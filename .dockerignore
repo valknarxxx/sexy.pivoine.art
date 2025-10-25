@@ -1,0 +1,84 @@
+# Git
+.git
+.gitignore
+
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs
+dist
+build
+.svelte-kit
+**/dist
+**/build
+**/.svelte-kit
+
+# Rust/Cargo
+target
+**/target
+Cargo.lock
+**/Cargo.lock
+
+# WASM outputs
+wasm
+**/wasm
+
+# Environment files
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Testing
+coverage
+.nyc_output
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose*.yml
+build.sh
+
+# Documentation
+*.md
+!README.md
+DOCKER.md
+CLAUDE.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Misc
+.prettierrc
+.prettierignore
+.eslintrc
+.eslintignore
+tsconfig.tsbuildinfo
