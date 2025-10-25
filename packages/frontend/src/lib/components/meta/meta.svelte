@@ -1,6 +1,6 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
-import { PUBLIC_URL || http://localhost:3000 } from "$env/static/public";
+import { PUBLIC_URL } from "$env/static/public";
 
 interface Props {
 	title: string;
@@ -11,7 +11,7 @@ interface Props {
 let {
 	title,
 	description,
-	image = `${PUBLIC_URL || http://localhost:3000}/img/kamasutra.jpg`,
+	image = `${PUBLIC_URL || "http://localhost:3000"}/img/kamasutra.jpg`,
 }: Props = $props();
 </script>
 

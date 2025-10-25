@@ -71,6 +71,7 @@ FROM node:20.19.1-slim AS runner
 # Install dumb-init for proper signal handling
 RUN apt-get update && apt-get install -y \
     dumb-init \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user

@@ -17,7 +17,7 @@ import {
 	aggregate,
 } from "@directus/sdk";
 import type { Article, Model, Stats, User, Video } from "$lib/types";
-import { PUBLIC_URL || http://localhost:3000 } from "$env/static/public";
+import { PUBLIC_URL } from "$env/static/public";
 
 const userFields = [
 	"*",
@@ -52,7 +52,7 @@ export async function register(
 	const directus = getDirectusInstance(fetch);
 	return directus.request(
 		registerUser(email, password, {
-			verification_url: `${PUBLIC_URL || http://localhost:3000}/signup/verify`,
+			verification_url: `${PUBLIC_URL || "http://localhost:3000"}/signup/verify`,
 			first_name: firstName,
 			last_name: lastName,
 		}),
@@ -79,7 +79,7 @@ export async function logout() {
 export async function requestPassword(email: string) {
 	const directus = getDirectusInstance(fetch);
 	return directus.request(
-		passwordRequest(email, `${PUBLIC_URL || http://localhost:3000}/password/reset`),
+		passwordRequest(email, `${PUBLIC_URL || "http://localhost:3000"}/password/reset`),
 	);
 }
 
