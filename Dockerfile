@@ -3,7 +3,7 @@
 # ============================================================================
 # Base stage - shared dependencies
 # ============================================================================
-FROM node:20.19.1-slim AS base
+FROM node:22.11.0-slim AS base
 
 # Enable corepack for pnpm
 RUN corepack enable
@@ -70,7 +70,7 @@ RUN pnpm prune --prod
 # ============================================================================
 # Runner stage - minimal production image
 # ============================================================================
-FROM node:20.19.1-slim AS runner
+FROM node:22.11.0-slim AS runner
 
 # Install dumb-init for proper signal handling
 RUN apt-get update && apt-get install -y \
