@@ -17,11 +17,8 @@
 	"packageManager": "pnpm@10.19.0",
 	"pnpm": {
 		"onlyBuiltDependencies": [
-			"@parcel/watcher",
-			"es5-ext",
-			"esbuild",
 			"svelte-preprocess",
-			"wasm-pack"
+			"vue-demi"
 		],
 		"ignoredBuiltDependencies": [
 			"@tailwindcss/oxide",
