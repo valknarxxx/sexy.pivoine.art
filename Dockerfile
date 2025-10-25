@@ -14,6 +14,10 @@ WORKDIR /app
 # Copy workspace configuration
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 
+# Copy .env to .env.production for proper svelte compiling
+RUN mkdir -p ./packages/frontend
+COPY packages/frontend/.env ./packages/frontend/.env.production
+
 # ============================================================================
 # Builder stage - compile application with Rust/WASM support
 # ============================================================================
