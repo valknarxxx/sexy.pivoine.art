@@ -6,7 +6,7 @@
 FROM node:22.11.0-slim AS base
 
 # Enable corepack for pnpm
-RUN corepack enable
+RUN npm install -g corepack@latest && corepack enable
 
 # Set working directory
 WORKDIR /app
