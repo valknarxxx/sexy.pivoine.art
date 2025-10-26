@@ -22,6 +22,8 @@ COPY packages/frontend/.env ./packages/frontend/.env.production
 # Builder stage - compile application with Rust/WASM support
 # ============================================================================
 FROM base AS builder
+ARG CI=false
+ENV CI=$CI
 
 # Install build dependencies for Rust and native modules
 RUN apt-get update && apt-get install -y \
