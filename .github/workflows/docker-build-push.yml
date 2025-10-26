@@ -20,7 +20,6 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: valknarxxx/sexy
-  CI: true
 
 jobs:
   build-and-push:
@@ -84,6 +83,7 @@ jobs:
         cache-to: type=gha,mode=max
         build-args: |
           NODE_ENV=production
+          CI=true
 
     - name: Generate image digest
       if: github.event_name != 'pull_request'
