@@ -65,7 +65,7 @@ RUN pnpm --filter @sexy.pivoine.art/frontend build
 RUN pnpm --filter @sexy.pivoine.art/bundle build
 
 # Prune dev dependencies for production
-RUN pnpm install -rP --frozen-lockfile
+RUN pnpm install -rP
 
 # ============================================================================
 # Runner stage - minimal production image
