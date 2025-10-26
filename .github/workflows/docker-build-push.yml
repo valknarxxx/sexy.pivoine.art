@@ -20,6 +20,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: valknarxxx/sexy
+  CI: true
 
 jobs:
   build-and-push:
