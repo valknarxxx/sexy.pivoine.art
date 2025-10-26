@@ -8,6 +8,7 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			authStatus: AuthStatus;
+			requestId: string;
 		}
 		// interface PageData {}
 		// interface PageState {}

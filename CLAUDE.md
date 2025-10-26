@@ -106,19 +106,16 @@ Start production frontend server (local):
 pnpm --filter @sexy.pivoine.art/frontend start
 ```
 
-Docker deployment (recommended for production):
+Docker Compose deployment (recommended for production):
 ```bash
-# Build Docker image
-docker build -t sexy.pivoine.art:latest .
+# Local development (with Postgres, Redis, Directus)
+docker-compose up -d
 
-# Run with docker-compose
-docker-compose -f docker-compose.production.yml up -d
-
-# Or run directly
-docker run -d -p 3000:3000 --env-file .env.production sexy.pivoine.art:latest
+# Production (with Traefik, external DB, Redis)
+docker-compose -f compose.production.yml --env-file .env.production up -d
 ```
 
-See `DOCKER.md` for comprehensive Docker deployment guide.
+See `COMPOSE.md` for Docker Compose guide and `DOCKER.md` for standalone Docker deployment.
 
 ## Architecture Notes
 

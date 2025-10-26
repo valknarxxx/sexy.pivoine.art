@@ -1,0 +1,130 @@
+include:
+  - compose.yml
+
+# Production compose file - extends base compose.yml
+# Usage: docker-compose -f compose.production.yml up -d
+
+networks:
+  compose_network:
+    external: true
+    name: compose_network
+
+services:
+  # Disable local postgres for production (use external DB)
+  postgres:
+    deploy:
+      replicas: 0
+
+  # Disable local redis for production (use external Redis)
+  redis:
+    deploy:
+      replicas: 0
+
+  # Override Directus for production
+  directus:
+    networks:
+      - compose_network
+    ports: []  # Remove exposed ports, use Traefik instead
+
+    # Override volumes for production paths
+    volumes:
+      - ${SEXY_DIRECTUS_UPLOADS:-./uploads}:/directus/uploads
+      - ${SEXY_DIRECTUS_BUNDLE:-./packages/bundle/dist}:/directus/extensions/sexy.pivoine.art
+
+    # Override environment for production settings
+    environment:
+      # Database (external)
+      DB_HOST: ${CORE_DB_HOST}
+      DB_PORT: ${CORE_DB_PORT:-5432}
+      DB_DATABASE: ${SEXY_DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      # General
+      SECRET: ${SEXY_DIRECTUS_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      PUBLIC_URL: ${SEXY_PUBLIC_URL}
+
+      # Cache (external Redis)
+      REDIS: redis://${CORE_REDIS_HOST}:${CORE_REDIS_PORT:-6379}
+
+      # CORS
+      CORS_ORIGIN: ${SEXY_CORS_ORIGIN}
+
+      # Security (production settings)
+      SESSION_COOKIE_SECURE: ${SEXY_SESSION_COOKIE_SECURE:-true}
+      SESSION_COOKIE_SAME_SITE: ${SEXY_SESSION_COOKIE_SAME_SITE:-strict}
+      SESSION_COOKIE_DOMAIN: ${SEXY_SESSION_COOKIE_DOMAIN}
+
+      # Extensions
+      EXTENSIONS_AUTO_RELOAD: ${SEXY_EXTENSIONS_AUTO_RELOAD:-false}
+
+      # Email (production SMTP)
+      EMAIL_TRANSPORT: ${EMAIL_TRANSPORT:-smtp}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST}
+      EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT:-587}
+      EMAIL_SMTP_USER: ${EMAIL_SMTP_USER}
+      EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD}
+
+      # User URLs
+      USER_REGISTER_URL_ALLOW_LIST: ${SEXY_USER_REGISTER_URL_ALLOW_LIST}
+      PASSWORD_RESET_URL_ALLOW_LIST: ${SEXY_PASSWORD_RESET_URL_ALLOW_LIST}
+
+    # Remove local dependencies
+    depends_on: []
+
+    labels:
+      # Traefik labels for reverse proxy
+      - 'traefik.enable=${SEXY_TRAEFIK_ENABLED:-true}'
+      - 'traefik.http.middlewares.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-redirect-web-secure.redirectscheme.scheme=https'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-web.middlewares=${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-redirect-web-secure'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-web.rule=Host(`${SEXY_TRAEFIK_HOST}`) && PathPrefix(`/api`)'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-web.entrypoints=web'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-web-secure.rule=Host(`${SEXY_TRAEFIK_HOST}`) && PathPrefix(`/api`)'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-web-secure.tls.certresolver=resolver'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-web-secure.entrypoints=web-secure'
+      - 'traefik.http.middlewares.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-web-secure-compress.compress=true'
+      - 'traefik.http.middlewares.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-strip.stripprefix.prefixes=/api'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-web-secure.middlewares=${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-strip,${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-web-secure-compress'
+      - 'traefik.http.services.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-api-web-secure.loadbalancer.server.port=8055'
+      - 'traefik.docker.network=compose_network'
+
+  # Override Frontend for production
+  frontend:
+    networks:
+      - compose_network
+    ports: []  # Remove exposed ports, use Traefik instead
+
+    # Override environment for production
+    environment:
+      NODE_ENV: production
+      PUBLIC_API_URL: ${SEXY_FRONTEND_PUBLIC_API_URL}
+      PUBLIC_URL: ${SEXY_FRONTEND_PUBLIC_URL}
+      PUBLIC_UMAMI_ID: ${SEXY_FRONTEND_PUBLIC_UMAMI_ID:-}
+      LETTERSPACE_API_URL: ${SEXY_FRONTEND_LETTERSPACE_API_URL:-}
+      LETTERSPACE_API_KEY: ${SEXY_FRONTEND_LETTERSPACE_API_KEY:-}
+      LETTERSPACE_LIST_ID: ${SEXY_FRONTEND_LETTERSPACE_LIST_ID:-}
+
+    # Override volume for production path
+    volumes:
+      - ${SEXY_FRONTEND_PATH:-/var/www/sexy.pivoine.art}:/home/node/app
+
+    # Remove local dependency
+    depends_on: []
+
+    labels:
+      # Traefik labels for reverse proxy
+      - 'traefik.enable=${SEXY_TRAEFIK_ENABLED:-true}'
+      - 'traefik.http.middlewares.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-redirect-web-secure.redirectscheme.scheme=https'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-web.middlewares=${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-redirect-web-secure'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-web.rule=Host(`${SEXY_TRAEFIK_HOST}`)'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-web.entrypoints=web'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-web-secure.rule=Host(`${SEXY_TRAEFIK_HOST}`)'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-web-secure.tls.certresolver=resolver'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-web-secure.entrypoints=web-secure'
+      - 'traefik.http.middlewares.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-web-secure-compress.compress=true'
+      - 'traefik.http.routers.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-web-secure.middlewares=${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-web-secure-compress'
+      - 'traefik.http.services.${SEXY_COMPOSE_PROJECT_NAME:-sexy}-frontend-web-secure.loadbalancer.server.port=3000'
+      - 'traefik.docker.network=compose_network'

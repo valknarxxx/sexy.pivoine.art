@@ -137,7 +137,8 @@ sexy.pivoine.art/
 | Document | Purpose | Emoji |
 |----------|---------|-------|
 | [QUICKSTART.md](QUICKSTART.md) | Get wet... I mean, get started! | 💦 |
-| [DOCKER.md](DOCKER.md) | Complete deployment manual | 🐳 |
+| [COMPOSE.md](COMPOSE.md) | Docker Compose setup guide | 🐳 |
+| [DOCKER.md](DOCKER.md) | Standalone Docker deployment | 🐋 |
 | [CLAUDE.md](CLAUDE.md) | Architecture & development | 🤖 |
 | [.github/workflows/README.md](.github/workflows/README.md) | CI/CD workflows | ⚙️ |
 
@@ -179,15 +180,15 @@ docker buildx build --platform linux/amd64,linux/arm64 -t sexy.pivoine.art:lates
 
 ## 🚀 Deployment — Share Your Creation
 
-### Production with Docker
+### Production with Docker Compose
 
 ```bash
 # Configure your secrets
 cp .env.production.example .env.production
 # Edit .env.production with your intimate details
 
-# Deploy with grace
-docker-compose -f docker-compose.production.yml up -d
+# Deploy with grace (uses Traefik for routing)
+docker-compose -f compose.production.yml --env-file .env.production up -d
 ```
 
 ### Production without Docker

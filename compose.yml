@@ -1,0 +1,183 @@
+services:
+  # PostgreSQL Database (local only)
+  postgres:
+    image: postgres:16-alpine
+    container_name: ${SEXY_COMPOSE_PROJECT_NAME:-sexy}_postgres
+    restart: unless-stopped
+    networks:
+      - sexy-network
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-sexy}
+      POSTGRES_USER: ${DB_USER:-sexy}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-sexy}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-sexy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache (local only)
+  redis:
+    image: redis:7-alpine
+    container_name: ${SEXY_COMPOSE_PROJECT_NAME:-sexy}_redis
+    restart: unless-stopped
+    networks:
+      - sexy-network
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Directus CMS
+  directus:
+    image: ${SEXY_DIRECTUS_IMAGE:-directus/directus:11}
+    container_name: ${SEXY_COMPOSE_PROJECT_NAME:-sexy}_api
+    restart: unless-stopped
+    networks:
+      - sexy-network
+    ports:
+      - "8055:8055"
+    volumes:
+      - directus-uploads:/directus/uploads
+      - ${SEXY_DIRECTUS_BUNDLE:-./packages/bundle/dist}:/directus/extensions/sexy.pivoine.art
+    environment:
+      # Database
+      DB_CLIENT: pg
+      DB_HOST: ${CORE_DB_HOST:-postgres}
+      DB_PORT: ${CORE_DB_PORT:-5432}
+      DB_DATABASE: ${SEXY_DB_NAME:-sexy}
+      DB_USER: ${DB_USER:-sexy}
+      DB_PASSWORD: ${DB_PASSWORD:-sexy}
+
+      # General
+      SECRET: ${SEXY_DIRECTUS_SECRET:-replace-with-random-secret-min-32-chars}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@sexy.pivoine.art}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+      PUBLIC_URL: ${SEXY_PUBLIC_URL:-http://localhost:8055}
+
+      # Cache
+      CACHE_ENABLED: ${SEXY_CACHE_ENABLED:-true}
+      CACHE_AUTO_PURGE: ${SEXY_CACHE_AUTO_PURGE:-true}
+      CACHE_STORE: redis
+      REDIS: redis://${CORE_REDIS_HOST:-redis}:${CORE_REDIS_PORT:-6379}
+
+      # CORS
+      CORS_ENABLED: ${SEXY_CORS_ENABLED:-true}
+      CORS_ORIGIN: ${SEXY_CORS_ORIGIN:-http://localhost:3000}
+
+      # Security
+      SESSION_COOKIE_SECURE: ${SEXY_SESSION_COOKIE_SECURE:-false}
+      SESSION_COOKIE_SAME_SITE: ${SEXY_SESSION_COOKIE_SAME_SITE:-lax}
+      SESSION_COOKIE_DOMAIN: ${SEXY_SESSION_COOKIE_DOMAIN:-localhost}
+
+      # Extensions
+      EXTENSIONS_PATH: ${SEXY_EXTENSIONS_PATH:-/directus/extensions}
+      EXTENSIONS_AUTO_RELOAD: ${SEXY_EXTENSIONS_AUTO_RELOAD:-true}
+
+      # WebSockets
+      WEBSOCKETS_ENABLED: ${SEXY_WEBSOCKETS_ENABLED:-true}
+
+      # Email (optional for local dev)
+      EMAIL_TRANSPORT: ${EMAIL_TRANSPORT:-sendmail}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@sexy.pivoine.art}
+      EMAIL_SMTP_HOST: ${EMAIL_SMTP_HOST:-}
+      EMAIL_SMTP_PORT: ${EMAIL_SMTP_PORT:-587}
+      EMAIL_SMTP_USER: ${EMAIL_SMTP_USER:-}
+      EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD:-}
+
+      # User Registration & Password Reset URLs
+      USER_REGISTER_URL_ALLOW_LIST: ${SEXY_USER_REGISTER_URL_ALLOW_LIST:-http://localhost:3000}
+      PASSWORD_RESET_URL_ALLOW_LIST: ${SEXY_PASSWORD_RESET_URL_ALLOW_LIST:-http://localhost:3000}
+
+      # Content Security Policy
+      CONTENT_SECURITY_POLICY_DIRECTIVES__FRAME_SRC: ${SEXY_CONTENT_SECURITY_POLICY_DIRECTIVES__FRAME_SRC:-}
+
+      # Timezone
+      TZ: ${TIMEZONE:-Europe/Amsterdam}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8055/server/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (local development - optional, usually run via pnpm dev)
+  frontend:
+    image: ${SEXY_FRONTEND_IMAGE:-ghcr.io/valknarxxx/sexy:latest}
+    container_name: ${SEXY_COMPOSE_PROJECT_NAME:-sexy}_frontend
+    restart: unless-stopped
+    user: node
+    working_dir: /home/node/app/packages/frontend
+    networks:
+      - sexy-network
+    ports:
+      - "3000:3000"
+    environment:
+      # Node
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      HOST: 0.0.0.0
+
+      # Public environment variables
+      PUBLIC_API_URL: ${SEXY_FRONTEND_PUBLIC_API_URL:-http://localhost:8055}
+      PUBLIC_URL: ${SEXY_FRONTEND_PUBLIC_URL:-http://localhost:3000}
+      PUBLIC_UMAMI_ID: ${SEXY_FRONTEND_PUBLIC_UMAMI_ID:-}
+
+      # Letterspace newsletter integration
+      LETTERSPACE_API_URL: ${SEXY_FRONTEND_LETTERSPACE_API_URL:-}
+      LETTERSPACE_API_KEY: ${SEXY_FRONTEND_LETTERSPACE_API_KEY:-}
+      LETTERSPACE_LIST_ID: ${SEXY_FRONTEND_LETTERSPACE_LIST_ID:-}
+
+      # Timezone
+      TZ: ${TIMEZONE:-Europe/Amsterdam}
+
+    volumes:
+      - ${SEXY_FRONTEND_PATH:-./}:/home/node/app
+
+    command: ["node", "build/index.js"]
+
+    depends_on:
+      - directus
+
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+    # Uncomment to run frontend in development mode with live reload
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    # volumes:
+    #   - ./packages/frontend:/home/node/app/packages/frontend
+    #   - /home/node/app/packages/frontend/node_modules
+    # environment:
+    #   NODE_ENV: development
+
+networks:
+  sexy-network:
+    driver: bridge
+    name: ${SEXY_COMPOSE_PROJECT_NAME:-sexy}_network
+
+volumes:
+  directus-uploads:
+    driver: local
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
