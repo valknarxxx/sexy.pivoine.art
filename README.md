@@ -1,70 +1,162 @@
-# sexy.pivoine.art
+# 💋 sexy.pivoine.art
 
-An adult content platform built with SvelteKit, Directus CMS, and hardware integration via Buttplug.io.
+<div align="center">
 
-[![Build and Push Docker Image](https://github.com/valknarxxx/sexy/actions/workflows/docker-build-push.yml/badge.svg)](https://github.com/valknarxxx/sexy/actions/workflows/docker-build-push.yml)
-[![Docker Image Security Scan](https://github.com/valknarxxx/sexy/actions/workflows/docker-scan.yml/badge.svg)](https://github.com/valknarxxx/sexy/actions/workflows/docker-scan.yml)
+![Beate Uhse Flying](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGh2ZjBrY2xvYXB0aGN6OWp4YzR4Y3doNzJoZ3J3ZjNqMGx4YzRhZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3o6Zt6ML6BklcajjsA/giphy.gif)
 
-## Quick Start
+*"Lust und Liebe gehören zusammen - wer das eine verteufelt, zerstört auch das andere."*
+— **Beate Uhse**, Pionierin der sexuellen Befreiung ✈️
 
-### Using Docker (Recommended)
+---
+
+### 🍆 An Intimate Platform for Liberation & Pleasure 🍆
+
+Built with passion, technology, and the fearless spirit of sexual empowerment
+
+[![Build Status](https://img.shields.io/github/actions/workflow/status/valknarxxx/sexy.pivoine.art/docker-build-push.yml?style=for-the-badge&logo=docker&logoColor=white&color=FF69B4&labelColor=8B008B)](https://github.com/valknarxxx/sexy.pivoine.art/actions/workflows/docker-build-push.yml)
+[![Security Scan](https://img.shields.io/github/actions/workflow/status/valknarxxx/sexy.pivoine.art/docker-scan.yml?style=for-the-badge&logo=security&logoColor=white&label=Security&color=DA70D6&labelColor=8B008B)](https://github.com/valknarxxx/sexy.pivoine.art/actions/workflows/docker-scan.yml)
+[![License](https://img.shields.io/badge/License-For_Pleasure-FF1493?style=for-the-badge&logo=heart&logoColor=white&labelColor=8B008B)](LICENSE)
+[![Made with Love](https://img.shields.io/badge/Made_with-💜_Love-FF69B4?style=for-the-badge&labelColor=8B008B)](http://sexy.pivoine.art)
+
+</div>
+
+---
+
+## 👅 What Is This Delicious Creation?
+
+Welcome, dear pleasure-seeker! This is **sexy.pivoine.art** — a modern, sensual platform combining the elegance of **SvelteKit**, the power of **Directus CMS**, and the intimate connection of **Buttplug.io** hardware integration.
+
+Like Beate Uhse breaking barriers in post-war Germany, we believe in the freedom to explore, create, and celebrate sexuality without shame. This platform is built for **models**, **creators**, and **connoisseurs** of adult content who deserve technology as sophisticated as their desires.
+
+### ♉ Features That'll Make You Blush ♊
+
+- 💖 **Sensual SvelteKit Frontend** with Tailwind CSS 4 styling
+- 🗄️ **Headless CMS** powered by Directus for content liberation
+- 🎮 **Hardware Integration** via Buttplug.io (yes, really!)
+- 🌐 **Multi-Platform Support** (AMD64 + ARM64) — pleasure everywhere
+- 🔒 **Session-Based Authentication** — discretion guaranteed
+- 📱 **Responsive Design** that looks sexy on any device
+- 🌍 **Internationalization** — pleasure speaks all languages
+- 📊 **Analytics Integration** (Umami) — know your admirers
+- 📧 **Newsletter Integration** (Letterspace) — stay connected
+
+<div align="center">
+
+### 🍑 Technology Stack 🍑
+
+</div>
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  💋 Frontend Layer                                          │
+│  ├─ SvelteKit 2.0         → Smooth as silk               │
+│  ├─ Tailwind CSS 4        → Styled to seduce             │
+│  ├─ bits-ui Components    → Building blocks of pleasure   │
+│  └─ Vite                  → Fast and furious             │
+├─────────────────────────────────────────────────────────────┤
+│  🍷 Backend Layer                                           │
+│  ├─ Directus CMS          → Content with no limits       │
+│  ├─ Custom Extensions     → Bespoke pleasures            │
+│  └─ PostgreSQL            → Data deep and secure         │
+├─────────────────────────────────────────────────────────────┤
+│  🎀 Hardware Layer                                          │
+│  ├─ Buttplug.io           → Real connections             │
+│  ├─ TypeScript + Rust     → Power and precision          │
+│  └─ WebBluetooth API      → Wireless intimacy            │
+├─────────────────────────────────────────────────────────────┤
+│  🌸 DevOps Layer                                            │
+│  ├─ Docker                → Containerized ecstasy         │
+│  ├─ GitHub Actions        → Automated seduction          │
+│  └─ GHCR                  → Images served hot            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔥 Quick Start — Get Intimate Fast
+
+### 💕 Option 1: Using Docker (Recommended)
 
 ```bash
-# Pull and run the latest image
+# Pull the pleasure
 docker pull ghcr.io/valknarxxx/sexy:latest
+
+# Run with passion
 docker run -d -p 3000:3000 \
   -e PUBLIC_API_URL=https://api.your-domain.com \
   -e PUBLIC_URL=https://your-domain.com \
   ghcr.io/valknarxxx/sexy:latest
+
+# Visit your creation at http://localhost:3000 💋
 ```
 
-See [QUICKSTART.md](QUICKSTART.md) for detailed instructions.
+See [QUICKSTART.md](QUICKSTART.md) for the full seduction guide.
 
-### Local Development
+### 💜 Option 2: Local Development
 
 **Prerequisites:**
 
-1. Install Node.js 20.19.1
-2. Enable corepack: `corepack enable`
-3. Install dependencies: `pnpm install`
-4. Install Rust and wasm-bindgen: `cargo install wasm-bindgen-cli`
+1. Node.js 20.19.1 — *the foundation*
+2. `corepack enable` — *unlock the tools*
+3. `pnpm install` — *gather your ingredients*
+4. Rust + `cargo install wasm-bindgen-cli` — *forge the connection*
 
-**Start development environment:**
+**Start your pleasure journey:**
 
 ```bash
-# Start all services (Docker Compose + frontend)
+# Awaken all services
 pnpm dev
 
-# Or start individually
-pnpm dev:data      # Start data services
-pnpm dev:directus  # Start Directus CMS
-pnpm --filter @sexy.pivoine.art/frontend dev  # Start frontend
+# Or tease them one by one
+pnpm dev:data      # The foundation
+pnpm dev:directus  # The content
+pnpm --filter @sexy.pivoine.art/frontend dev  # The face
 ```
 
-Access the application at `http://localhost:3000`
+Visit `http://localhost:3000` and let the experience begin... 💋
 
-## Project Structure
+---
 
-This is a pnpm monorepo with three packages:
+## 🌹 Project Structure
 
-- **`packages/frontend`** - SvelteKit application with Tailwind CSS 4
-- **`packages/bundle`** - Directus extensions (endpoints, hooks, themes)
-- **`packages/buttplug`** - Hardware control library (TypeScript + Rust/WASM)
+This monorepo contains three packages, each serving its purpose:
 
-## Documentation
+```
+sexy.pivoine.art/
+├─ 💄 packages/frontend/    → SvelteKit app (the seduction)
+├─ 🎭 packages/bundle/       → Directus extensions (the power)
+└─ 🎮 packages/buttplug/     → Hardware control (the connection)
+```
 
-- **[QUICKSTART.md](QUICKSTART.md)** - Get running in 5 minutes with Docker
-- **[DOCKER.md](DOCKER.md)** - Comprehensive Docker deployment guide
-- **[CLAUDE.md](CLAUDE.md)** - Development guide and architecture
-- **[.github/workflows/README.md](.github/workflows/README.md)** - CI/CD workflows
+---
 
-## Building
+## 📚 Documentation — Your Guide to Pleasure
+
+<div align="center">
+
+| Document | Purpose | Emoji |
+|----------|---------|-------|
+| [QUICKSTART.md](QUICKSTART.md) | Get wet... I mean, get started! | 💦 |
+| [DOCKER.md](DOCKER.md) | Complete deployment manual | 🐳 |
+| [CLAUDE.md](CLAUDE.md) | Architecture & development | 🤖 |
+| [.github/workflows/README.md](.github/workflows/README.md) | CI/CD workflows | ⚙️ |
+
+</div>
+
+---
+
+## 🎨 Building — Craft Your Masterpiece
 
 ### Build All Packages
 
 ```bash
+# Prepare everything
 pnpm install
+
+# Build the WASM foundation
 pnpm --filter @sexy.pivoine.art/buttplug build:wasm
+
+# Build the packages
 pnpm --filter @sexy.pivoine.art/buttplug build
 pnpm --filter @sexy.pivoine.art/frontend build
 pnpm --filter @sexy.pivoine.art/bundle build
@@ -73,102 +165,114 @@ pnpm --filter @sexy.pivoine.art/bundle build
 ### Build Docker Image
 
 ```bash
-# Using the build script
+# Quick build
 ./build.sh
 
-# Or manually
+# Manual control
 docker build -t sexy.pivoine.art:latest .
 
-# Multi-platform
+# Multi-platform pleasure
 docker buildx build --platform linux/amd64,linux/arm64 -t sexy.pivoine.art:latest .
 ```
 
-## Deployment
+---
+
+## 🚀 Deployment — Share Your Creation
 
 ### Production with Docker
 
 ```bash
-# Using docker-compose
+# Configure your secrets
 cp .env.production.example .env.production
-# Edit .env.production with your values
+# Edit .env.production with your intimate details
+
+# Deploy with grace
 docker-compose -f docker-compose.production.yml up -d
 ```
 
 ### Production without Docker
 
 ```bash
-# Build all packages
+# Build everything
 pnpm build:frontend
 
-# Start the server
+# Start serving
 pnpm --filter @sexy.pivoine.art/frontend start
 ```
 
-## Features
+---
 
-- 🎨 Modern SvelteKit frontend with Tailwind CSS 4
-- 🗄️ Headless CMS powered by Directus
-- 🎮 Hardware integration via Buttplug.io
-- 🌐 Multi-platform support (AMD64/ARM64)
-- 🔒 Session-based authentication
-- 📱 Responsive design with bits-ui components
-- 🌍 Internationalization support (i18n)
-- 📊 Built-in analytics integration (Umami)
-- 📧 Newsletter integration (Letterspace)
+## 🌈 Environment Variables
 
-## Technology Stack
+### 💖 Required (The Essentials)
 
-### Frontend
-- **Framework:** SvelteKit 2
-- **Styling:** Tailwind CSS 4
-- **UI Components:** bits-ui, custom component library
-- **Build Tool:** Vite
-- **Deployment:** Node.js adapter
+- `PUBLIC_API_URL` — Your Directus backend
+- `PUBLIC_URL` — Your frontend domain
 
-### Backend
-- **CMS:** Directus (headless)
-- **Extensions:** Custom endpoints, hooks, and themes
-- **Database:** PostgreSQL (via Directus)
+### 💜 Optional (The Extras)
 
-### Hardware
-- **Library:** Buttplug.io
-- **Languages:** TypeScript + Rust (compiled to WASM)
-- **Protocols:** WebBluetooth API
+- `PUBLIC_UMAMI_ID` — Analytics tracking
+- `LETTERSPACE_API_URL` — Newsletter endpoint
+- `LETTERSPACE_API_KEY` — Newsletter key
+- `LETTERSPACE_LIST_ID` — Mailing list
 
-### DevOps
-- **Containerization:** Docker + Docker Compose
-- **CI/CD:** GitHub Actions
-- **Registry:** GitHub Container Registry (GHCR)
-- **Security:** Trivy vulnerability scanning
+See [.env.production.example](.env.production.example) for the full configuration.
 
-## Environment Variables
+---
 
-### Required
+## 🎭 Development Workflow
 
-- `PUBLIC_API_URL` - Directus API endpoint
-- `PUBLIC_URL` - Frontend application URL
+```mermaid
+graph LR
+    A[💡 Idea] --> B[💻 Code]
+    B --> C[🧪 Test Locally]
+    C --> D[🌿 Feature Branch]
+    D --> E[📤 Push & PR]
+    E --> F{✅ CI Pass?}
+    F -->|Yes| G[🔀 Merge to Main]
+    F -->|No| B
+    G --> H[🚀 Auto Deploy]
+    H --> I[🏷️ Tag Release]
+    I --> J[🎉 Celebrate]
+```
 
-### Optional
+1. Create → `git checkout -b feature/my-sexy-feature`
+2. Develop → Write beautiful code
+3. Test → `pnpm dev`
+4. Push → Create PR (triggers CI build)
+5. Merge → Automatic deployment to production
+6. Release → `git tag v1.0.0 && git push origin v1.0.0`
 
-- `PUBLIC_UMAMI_ID` - Umami analytics tracking ID
-- `LETTERSPACE_API_URL` - Newsletter API endpoint
-- `LETTERSPACE_API_KEY` - Newsletter API key
-- `LETTERSPACE_LIST_ID` - Mailing list identifier
+---
 
-See [.env.production.example](.env.production.example) for full reference.
+## 🔐 Security — Protected Pleasure
 
-## Development Workflow
+- 🛡️ Daily vulnerability scans with Trivy
+- 🔒 Non-root Docker containers
+- 📊 Security reports in GitHub Security tab
+- 🤐 Confidential issue reporting available
 
-1. Make changes to code
-2. Test locally with `pnpm dev`
-3. Create a feature branch
-4. Push and create PR (triggers CI build)
-5. Merge to `main` (triggers production build)
-6. Tag release: `git tag v1.0.0 && git push origin v1.0.0`
+*Report security concerns privately via GitHub Security.*
 
-## CI/CD Pipeline
+---
 
-Automated workflows handle:
+## 💝 Contributing — Join the Movement
+
+Like Beate Uhse fought for sexual liberation, we welcome contributors who believe in freedom, pleasure, and quality code.
+
+1. **Fork** this repository
+2. **Create** your feature branch
+3. **Commit** your changes
+4. **Push** to your branch
+5. **Submit** a pull request
+
+All contributors are bound by our code of conduct: **Respect, Consent, and Quality.**
+
+---
+
+## 🎯 CI/CD Pipeline — Automated Seduction
+
+Our GitHub Actions workflows handle:
 
 - ✅ Multi-platform Docker builds (AMD64 + ARM64)
 - ✅ Automated publishing to GHCR
@@ -176,38 +280,82 @@ Automated workflows handle:
 - ✅ Weekly cleanup of old images
 - ✅ Semantic versioning from git tags
 
-Images are available at: `ghcr.io/valknarxxx/sexy`
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Ensure tests pass (when implemented)
-5. Submit a pull request
-
-## Security
-
-- Docker images are scanned daily for vulnerabilities
-- Security reports available in GitHub Security tab
-- Report security issues privately via GitHub Security
-
-## License
-
-See [LICENSE](LICENSE) file for details.
-
-## Support
-
-- **Issues:** [GitHub Issues](https://github.com/valknarxxx/sexy/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/valknarxxx/sexy/discussions)
-
-## Acknowledgments
-
-- Built with [SvelteKit](https://kit.svelte.dev/)
-- Powered by [Directus](https://directus.io/)
-- Hardware control via [Buttplug.io](https://buttplug.io/)
-- UI components from [bits-ui](https://www.bits-ui.com/)
+**Images available at:** `ghcr.io/valknarxxx/sexy`
 
 ---
 
-**Note:** This is an adult content platform. Users must be 18+ or the age of majority in their jurisdiction.
+## 💌 Credits & Acknowledgments
+
+<div align="center">
+
+### 🌸 Created with Love by 🌸
+
+**[Palina](http://sexy.pivoine.art) & [Valknar](http://sexy.pivoine.art)**
+
+*Für die Mäuse...* 🐭💕
+
+---
+
+### 🙏 Built With
+
+| Technology | Purpose |
+|------------|---------|
+| [SvelteKit](https://kit.svelte.dev/) | Framework |
+| [Directus](https://directus.io/) | CMS |
+| [Buttplug.io](https://buttplug.io/) | Hardware |
+| [bits-ui](https://www.bits-ui.com/) | Components |
+
+---
+
+### 💐 Inspired by Beate Uhse
+
+Pioneer of sexual liberation (1919-2001)
+Pilot, Entrepreneur, Freedom Fighter
+
+*"Eine Frau, die ihre Sexualität selbstbestimmt lebt, ist eine freie Frau."*
+
+![Beate Uhse Quote](https://img.shields.io/badge/Beate_Uhse-Sexual_Liberation_Pioneer-FF1493?style=for-the-badge&logo=heart&logoColor=white&labelColor=8B008B)
+
+</div>
+
+---
+
+## ⚖️ License & Legal
+
+- 📜 See [LICENSE](LICENSE) file for details
+- 🔞 **18+ Only** — This platform is for adults
+- 🌍 Users must be of legal age in their jurisdiction
+- ⚖️ We support equality, freedom, and consensual pleasure
+
+---
+
+## 💬 Support & Community
+
+<div align="center">
+
+[![Issues](https://img.shields.io/badge/🐛_Issues-Report_Here-FF69B4?style=for-the-badge&labelColor=8B008B)](https://github.com/valknarxxx/sexy.pivoine.art/issues)
+[![Discussions](https://img.shields.io/badge/💭_Discussions-Join_Here-DA70D6?style=for-the-badge&labelColor=8B008B)](https://github.com/valknarxxx/sexy.pivoine.art/discussions)
+[![Website](https://img.shields.io/badge/🌐_Website-Visit_Here-FF1493?style=for-the-badge&labelColor=8B008B)](http://sexy.pivoine.art)
+
+</div>
+
+---
+
+<div align="center">
+
+### 🍑 Made with 💜 for Freedom, Pleasure & Technology 🍑
+
+```
+ ██████╗ ███████╗██╗  ██╗██╗   ██╗
+██╔════╝ ██╔════╝╚██╗██╔╝╚██╗ ██╔╝
+╚█████╗  █████╗   ╚███╔╝  ╚████╔╝
+ ╚═══██╗ ██╔══╝   ██╔██╗   ╚██╔╝
+██████╔╝ ███████╗██╔╝╚██╗   ██║
+╚═════╝  ╚══════╝╚═╝  ╚═╝   ╚═╝
+```
+
+*Pleasure is a human right. Technology is freedom. Together, they are power.*
+
+**[sexy.pivoine.art](http://sexy.pivoine.art)** | © 2025 Palina & Valknar
+
+</div>
