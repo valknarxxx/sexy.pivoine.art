@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Beate Uhse Flying](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGh2ZjBrY2xvYXB0aGN6OWp4YzR4Y3doNzJoZ3J3ZjNqMGx4YzRhZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3o6Zt6ML6BklcajjsA/giphy.gif)
+![sexy lips tongue mouth american apparel moist lip gloss ](https://i.gifer.com/1pYe.gif)
 
 *"Lust und Liebe gehören zusammen - wer das eine verteufelt, zerstört auch das andere."*
 — **Beate Uhse**, Pionierin der sexuellen Befreiung ✈️
@@ -49,25 +49,25 @@ Like Beate Uhse breaking barriers in post-war Germany, we believe in the freedom
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  💋 Frontend Layer                                          │
-│  ├─ SvelteKit 2.0         → Smooth as silk               │
-│  ├─ Tailwind CSS 4        → Styled to seduce             │
-│  ├─ bits-ui Components    → Building blocks of pleasure   │
-│  └─ Vite                  → Fast and furious             │
+│  ├─ SvelteKit 2.0         → Smooth as silk                  │
+│  ├─ Tailwind CSS 4        → Styled to seduce                │
+│  ├─ bits-ui Components    → Building blocks of pleasure     │
+│  └─ Vite                  → Fast and furious                │
 ├─────────────────────────────────────────────────────────────┤
 │  🍷 Backend Layer                                           │
-│  ├─ Directus CMS          → Content with no limits       │
-│  ├─ Custom Extensions     → Bespoke pleasures            │
-│  └─ PostgreSQL            → Data deep and secure         │
+│  ├─ Directus CMS          → Content with no limits          │
+│  ├─ Custom Extensions     → Bespoke pleasures               │
+│  └─ PostgreSQL            → Data deep and secure            │
 ├─────────────────────────────────────────────────────────────┤
 │  🎀 Hardware Layer                                          │
-│  ├─ Buttplug.io           → Real connections             │
-│  ├─ TypeScript + Rust     → Power and precision          │
-│  └─ WebBluetooth API      → Wireless intimacy            │
+│  ├─ Buttplug.io           → Real connections                │
+│  ├─ TypeScript + Rust     → Power and precision             │
+│  └─ WebBluetooth API      → Wireless intimacy               │
 ├─────────────────────────────────────────────────────────────┤
 │  🌸 DevOps Layer                                            │
-│  ├─ Docker                → Containerized ecstasy         │
-│  ├─ GitHub Actions        → Automated seduction          │
-│  └─ GHCR                  → Images served hot            │
+│  ├─ Docker                → Containerized ecstasy           │
+│  ├─ GitHub Actions        → Automated seduction             │
+│  └─ GHCR                  → Images served hot               │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -345,14 +345,14 @@ Pilot, Entrepreneur, Freedom Fighter
 
 ### 🍑 Made with 💜 for Freedom, Pleasure & Technology 🍑
 
-```
+<pre>
  ██████╗ ███████╗██╗  ██╗██╗   ██╗
 ██╔════╝ ██╔════╝╚██╗██╔╝╚██╗ ██╔╝
 ╚█████╗  █████╗   ╚███╔╝  ╚████╔╝
  ╚═══██╗ ██╔══╝   ██╔██╗   ╚██╔╝
 ██████╔╝ ███████╗██╔╝╚██╗   ██║
 ╚═════╝  ╚══════╝╚═╝  ╚═╝   ╚═╝
-```
+</pre>
 
 *Pleasure is a human right. Technology is freedom. Together, they are power.*
 
