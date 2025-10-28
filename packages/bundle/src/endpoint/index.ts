@@ -71,9 +71,6 @@ export default {
 					.where("r.name", "Model")
 					.orderBy("u.id", "desc");
 
-				if (featured === "true") {
-					query = query.where("u.featured", true);
-				}
 
 				if (limit) {
 					query = query.limit(parseInt(limit as string));
@@ -216,9 +213,7 @@ export default {
 					.where("a.publish_date", "<=", new Date().toISOString())
 					.orderBy("a.publish_date", "desc");
 
-				if (featured === "true") {
 					query = query.where("a.featured", true);
-				}
 
 				if (limit) {
 					query = query.limit(parseInt(limit as string));
