@@ -1,7 +1,6 @@
 <script lang="ts">
 import { _ } from "svelte-i18n";
 import * as Dialog from "$lib/components/ui/dialog";
-import * as Select from "$lib/components/ui/select";
 import Button from "$lib/components/ui/button/button.svelte";
 import type { BluetoothDevice, DeviceInfo } from "$lib/types";
 
@@ -17,9 +16,6 @@ let { open, recordedDevices, connectedDevices, onConfirm, onCancel }: Props = $p
 
 // Device mappings: recorded device name -> connected device
 let mappings = $state<Map<string, BluetoothDevice>>(new Map());
-
-// Selected values for each device (for Select component binding)
-let selectedValues = $state<Map<string, { value: string; label: string }>>(new Map());
 
 // Check if a connected device is compatible with a recorded device
 function isCompatible(recordedDevice: DeviceInfo, connectedDevice: BluetoothDevice): boolean {
@@ -42,7 +38,6 @@ function getCompatibleDevices(recordedDevice: DeviceInfo): BluetoothDevice[] {
 $effect(() => {
 	if (open && recordedDevices.length > 0 && connectedDevices.length > 0) {
 		const newMappings = new Map<string, BluetoothDevice>();
-		const newSelectedValues = new Map<string, { value: string; label: string }>();
 
 		recordedDevices.forEach(recordedDevice => {
 			// Try to find exact name match first
@@ -58,12 +53,10 @@ $effect(() => {
 
 			if (match) {
 				newMappings.set(recordedDevice.name, match);
-				newSelectedValues.set(recordedDevice.name, { value: match.id, label: match.name });
 			}
 		});
 
 		mappings = newMappings;
-		selectedValues = newSelectedValues;
 	}
 });
 
@@ -76,18 +69,14 @@ function handleConfirm() {
 	onConfirm(mappings);
 }
 
-function handleDeviceSelect(recordedDeviceName: string, selected: { value: string; label: string } | undefined) {
-	if (!selected?.value) return;
+function handleDeviceSelect(recordedDeviceName: string, deviceId: string) {
+	if (!deviceId) return;
 
-	const device = connectedDevices.find(d => d.id === selected.value);
+	const device = connectedDevices.find(d => d.id === deviceId);
 	if (device) {
 		const newMappings = new Map(mappings);
 		newMappings.set(recordedDeviceName, device);
 		mappings = newMappings;
-
-		const newSelectedValues = new Map(selectedValues);
-		newSelectedValues.set(recordedDeviceName, selected);
-		selectedValues = newSelectedValues;
 	}
 }
 
@@ -108,7 +97,7 @@ const allDevicesMapped = $derived(
 		<div class="space-y-4 py-4">
 			{#each recordedDevices as recordedDevice}
 				{@const compatibleDevices = getCompatibleDevices(recordedDevice)}
-				{@const currentSelected = selectedValues.get(recordedDevice.name)}
+				{@const currentMapping = mappings.get(recordedDevice.name)}
 
 				<div class="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border border-border/50">
 					<div class="flex-1">
@@ -134,29 +123,19 @@ const allDevicesMapped = $derived(
 								<span class="text-sm">No compatible devices</span>
 							</div>
 						{:else}
-							<Select.Root
-								selected={currentSelected}
-								onSelectedChange={(selected) => {
-									handleDeviceSelect(recordedDevice.name, selected);
-								}}
+							<select
+								class="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+								value={currentMapping?.id || ''}
+								onchange={(e) => handleDeviceSelect(recordedDevice.name, e.currentTarget.value)}
 							>
-								<Select.Trigger class="w-full">
-									<Select.Value placeholder="Select device..." />
-								</Select.Trigger>
-								<Select.Content>
-									{#each compatibleDevices as device}
-										<Select.Item value={device.id} label={device.name}>
-											<div class="flex items-center gap-2">
-												<span class="icon-[ri--bluetooth-line] w-4 h-4"></span>
-												<span>{device.name}</span>
-												{#if device.name === recordedDevice.name}
-													<span class="icon-[ri--checkbox-circle-fill] w-4 h-4 text-green-500"></span>
-												{/if}
-											</div>
-										</Select.Item>
-									{/each}
-								</Select.Content>
-							</Select.Root>
+								<option value="" disabled>Select device...</option>
+								{#each compatibleDevices as device}
+									<option value={device.id}>
+										{device.name}
+										{#if device.name === recordedDevice.name}(exact match){/if}
+									</option>
+								{/each}
+							</select>
 						{/if}
 					</div>
 				</div>
