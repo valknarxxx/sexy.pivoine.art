@@ -18,6 +18,9 @@ let { open, recordedDevices, connectedDevices, onConfirm, onCancel }: Props = $p
 // Device mappings: recorded device name -> connected device
 let mappings = $state<Map<string, BluetoothDevice>>(new Map());
 
+// Selected values for each device (for Select component binding)
+let selectedValues = $state<Map<string, { value: string; label: string }>>(new Map());
+
 // Check if a connected device is compatible with a recorded device
 function isCompatible(recordedDevice: DeviceInfo, connectedDevice: BluetoothDevice): boolean {
 	const connectedActuators = connectedDevice.info.messageAttributes.ScalarCmd.map(
@@ -39,6 +42,7 @@ function getCompatibleDevices(recordedDevice: DeviceInfo): BluetoothDevice[] {
 $effect(() => {
 	if (open && recordedDevices.length > 0 && connectedDevices.length > 0) {
 		const newMappings = new Map<string, BluetoothDevice>();
+		const newSelectedValues = new Map<string, { value: string; label: string }>();
 
 		recordedDevices.forEach(recordedDevice => {
 			// Try to find exact name match first
@@ -54,10 +58,12 @@ $effect(() => {
 
 			if (match) {
 				newMappings.set(recordedDevice.name, match);
+				newSelectedValues.set(recordedDevice.name, { value: match.id, label: match.name });
 			}
 		});
 
 		mappings = newMappings;
+		selectedValues = newSelectedValues;
 	}
 });
 
@@ -70,12 +76,18 @@ function handleConfirm() {
 	onConfirm(mappings);
 }
 
-function handleDeviceSelect(recordedDeviceName: string, selectedDeviceId: string) {
-	const device = connectedDevices.find(d => d.id === selectedDeviceId);
+function handleDeviceSelect(recordedDeviceName: string, selected: { value: string; label: string } | undefined) {
+	if (!selected?.value) return;
+
+	const device = connectedDevices.find(d => d.id === selected.value);
 	if (device) {
 		const newMappings = new Map(mappings);
 		newMappings.set(recordedDeviceName, device);
 		mappings = newMappings;
+
+		const newSelectedValues = new Map(selectedValues);
+		newSelectedValues.set(recordedDeviceName, selected);
+		selectedValues = newSelectedValues;
 	}
 }
 
@@ -96,7 +108,7 @@ const allDevicesMapped = $derived(
 		<div class="space-y-4 py-4">
 			{#each recordedDevices as recordedDevice}
 				{@const compatibleDevices = getCompatibleDevices(recordedDevice)}
-				{@const currentMapping = mappings.get(recordedDevice.name)}
+				{@const currentSelected = selectedValues.get(recordedDevice.name)}
 
 				<div class="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border border-border/50">
 					<div class="flex-1">
@@ -123,11 +135,9 @@ const allDevicesMapped = $derived(
 							</div>
 						{:else}
 							<Select.Root
-								selected={{ value: currentMapping?.id || '', label: currentMapping?.name || 'Select device...' }}
+								selected={currentSelected}
 								onSelectedChange={(selected) => {
-									if (selected?.value) {
-										handleDeviceSelect(recordedDevice.name, selected.value);
-									}
+									handleDeviceSelect(recordedDevice.name, selected);
 								}}
 							>
 								<Select.Trigger class="w-full">
