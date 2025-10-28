@@ -45,7 +45,7 @@ services:
       - "8055:8055"
     volumes:
       - directus-uploads:/directus/uploads
-      - ${SEXY_DIRECTUS_BUNDLE:-./packages/bundle/dist}:/directus/extensions/sexy.pivoine.art
+      - ${SEXY_DIRECTUS_BUNDLE:-./packages/bundle}:/directus/extensions/sexy.pivoine.art
     environment:
       # Database
       DB_CLIENT: pg
