@@ -3,9 +3,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "$lib/components/ui/avatar";
 import { getUserInitials } from "$lib/utils";
 
 interface User {
-	name: string;
+	name?: string;
 	email: string;
-	avatar: string;
+	avatar?: string;
 }
 
 interface Props {
@@ -124,13 +124,13 @@ $effect(() => {
 	<!-- Sliding user info -->
 	<button class="cursor-grab absolute left-0 top-0 h-full flex items-center gap-3 px-2 transition-all duration-200 ease-out rounded-full bg-background/80 backdrop-blur-sm border border-border/50 bg-background/90 border-primary/20 {isDragging ? '' : 'transition-all duration-300 ease-out'}" style="transform: translateX({slidePosition}px); width: calc(100% - {slidePosition}px);" onmousedown={handleMouseDown} ontouchstart={handleTouchStart}>
         <Avatar class="h-7 w-7 ring-2 ring-accent/20 transition-all duration-200 {isNearThreshold ? 'ring-destructive/40' : ''}" style="opacity: {Math.max(0.1, 1 - slideProgress * 1.8)}">
-			<AvatarImage src={user.avatar} alt={user.name} />
+			<AvatarImage src={user.avatar} alt={user.name || user.email} />
 			<AvatarFallback class="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-semibold transition-all duration-200 {isNearThreshold ? 'from-destructive to-destructive/80' : ''}">
-				{getUserInitials(user.name)}
+				{getUserInitials(user.name || user.email)}
 			</AvatarFallback>
 		</Avatar>
 		<div class="text-left flex flex-col min-w-0 flex-1">
-			<span class="text-sm font-medium text-foreground leading-none truncate transition-all duration-200 {isNearThreshold ? 'text-destructive' : ''}" style="opacity: {Math.max(0.15, 1 - slideProgress * 1.5)}">{user.name ? user.name.split(" ")[0] : "User"}</span>
+			<span class="text-sm font-medium text-foreground leading-none truncate transition-all duration-200 {isNearThreshold ? 'text-destructive' : ''}" style="opacity: {Math.max(0.15, 1 - slideProgress * 1.5)}">{user?.name ? user.name.split(" ")[0] : "User"}</span>
 			<span class="text-xs text-muted-foreground leading-none transition-all duration-200 {isNearThreshold ? 'text-destructive/70' : ''}" style="opacity: {Math.max(0.1, 1 - slideProgress * 1.8)}">
 				{slideProgress > 0.3 ? "Logout" : "Online"}
 			</span>
