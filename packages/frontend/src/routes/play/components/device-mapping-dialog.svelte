@@ -73,7 +73,9 @@ function handleConfirm() {
 function handleDeviceSelect(recordedDeviceName: string, selectedDeviceId: string) {
 	const device = connectedDevices.find(d => d.id === selectedDeviceId);
 	if (device) {
-		mappings.set(recordedDeviceName, device);
+		const newMappings = new Map(mappings);
+		newMappings.set(recordedDeviceName, device);
+		mappings = newMappings;
 	}
 }
 
