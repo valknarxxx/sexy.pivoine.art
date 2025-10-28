@@ -1,19 +1,24 @@
+import { redirect } from "@sveltejs/kit";
 import { getAnalytics, getFolders, getRecordings } from "$lib/services";
 import { isModel } from "$lib/directus";
 
 export async function load({ locals, fetch }) {
-	const recordings = locals.authStatus.authenticated
-		? await getRecordings(fetch).catch(() => [])
-		: [];
+	// Redirect to login if not authenticated
+	if (!locals.authStatus.authenticated) {
+		throw redirect(302, "/login");
+	}
 
-	const analytics =
-		locals.authStatus.authenticated && isModel(locals.authStatus.user)
-			? await getAnalytics(fetch).catch(() => null)
-			: null;
+	const recordings = await getRecordings(fetch).catch(() => []);
+
+	const analytics = isModel(locals.authStatus.user)
+		? await getAnalytics(fetch).catch(() => null)
+		: null;
+
+	const folders = await getFolders(fetch).catch(() => []);
 
 	return {
 		authStatus: locals.authStatus,
-		folders: await getFolders(fetch),
+		folders,
 		recordings,
 		analytics,
 	};
