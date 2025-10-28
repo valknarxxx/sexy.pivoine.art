@@ -58,6 +58,33 @@ export default {
 			});
 		});
 
+		// GET /sexy/models - Public endpoint to fetch models (bypasses permissions)
+		router.get("/models", async (req, res) => {
+			try {
+				const { featured, limit } = req.query;
+				const usersService = new ItemsService("directus_users", {
+					schema: await getSchema(),
+					accountability: null,
+				});
+
+				const filter: any = createPolicyFilter("Model");
+				if (featured === "true") {
+					filter._and = [filter, { featured: { _eq: true } }];
+				}
+
+				const models = await usersService.readByQuery({
+					filter,
+					fields: ["*", "photos.directus_files_id.*", "banner.*"],
+					sort: ["-id"],
+					limit: limit ? parseInt(limit as string) : -1,
+				});
+
+				res.json(models);
+			} catch (error: any) {
+				res.status(500).json({ error: error.message || "Failed to fetch models" });
+			}
+		});
+
 		// GET /sexy/recordings - List user's recordings
 		router.get("/recordings", async (req, res) => {
 			const accountability = req.accountability;

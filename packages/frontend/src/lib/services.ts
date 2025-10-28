@@ -351,10 +351,9 @@ export async function getModels(fetch?: typeof globalThis.fetch) {
 	return loggedApiCall("getModels", async () => {
 		const directus = getDirectusInstance(fetch);
 		return directus.request<Model[]>(
-			readUsers({
-				fields: ["*"],
-				filter: modelFilter,
-				sort: ["-join_date"],
+			customEndpoint({
+				method: "GET",
+				path: "/sexy/models",
 			}),
 		);
 	});
@@ -369,11 +368,9 @@ export async function getFeaturedModels(
 		async () => {
 			const directus = getDirectusInstance(fetch);
 			return directus.request<Model[]>(
-				readUsers({
-					fields: ["*"],
-					filter: { _and: [modelFilter, { featured: { _eq: true } }] },
-					sort: ["-join_date"],
-					limit,
+				customEndpoint({
+					method: "GET",
+					path: `/sexy/models?featured=true&limit=${limit}`,
 				}),
 			);
 		},
