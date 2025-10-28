@@ -20,6 +20,7 @@ import { onMount } from "svelte";
 import { goto } from "$app/navigation";
 import DeviceCard from "$lib/components/device-card/device-card.svelte";
 import RecordingSaveDialog from "./components/recording-save-dialog.svelte";
+import DeviceMappingDialog from "./components/device-mapping-dialog.svelte";
 import type { BluetoothDevice, RecordedEvent, DeviceInfo } from "$lib/types";
 import { toast } from "svelte-sonner";
 
@@ -41,6 +42,8 @@ let playbackProgress = $state(0);
 let playbackStartTime = $state<number | null>(null);
 let playbackTimeoutId = $state<number | null>(null);
 let currentEventIndex = $state(0);
+let showMappingDialog = $state(false);
+let deviceMappings = $state<Map<string, BluetoothDevice>>(new Map());
 
 async function init() {
 	const connector = new ButtplugWasmClientConnector();
@@ -237,16 +240,41 @@ function handleCancelSave() {
 
 // Playback functions
 function startPlayback() {
-	if (!data.recording || devices.length === 0) {
+	if (!data.recording) {
+		return;
+	}
+
+	if (devices.length === 0) {
 		toast.error("Please connect devices before playing recording");
 		return;
 	}
 
+	// Check if we need to map devices
+	if (deviceMappings.size === 0 && data.recording.device_info.length > 0) {
+		showMappingDialog = true;
+		return;
+	}
+
+	// Start playback with existing mappings
+	beginPlayback();
+}
+
+function beginPlayback() {
 	isPlaying = true;
 	playbackStartTime = performance.now();
 	playbackProgress = 0;
 	currentEventIndex = 0;
 	scheduleNextEvent();
+}
+
+function handleMappingConfirm(mappings: Map<string, BluetoothDevice>) {
+	deviceMappings = mappings;
+	showMappingDialog = false;
+	beginPlayback();
+}
+
+function handleMappingCancel() {
+	showMappingDialog = false;
 }
 
 function stopPlayback() {
@@ -309,19 +337,19 @@ function scheduleNextEvent() {
 }
 
 function executeEvent(event: RecordedEvent) {
-	// Find matching device by name
-	const device = devices.find(d => d.name === event.deviceName);
+	// Get mapped device
+	const device = deviceMappings.get(event.deviceName);
 	if (!device) {
-		console.warn(`Device not found: ${event.deviceName}`);
+		console.warn(`No device mapping for: ${event.deviceName}`);
 		return;
 	}
 
-	// Find matching actuator
+	// Find matching actuator by type
 	const scalarCmd = device.info.messageAttributes.ScalarCmd.find(
 		cmd => cmd.ActuatorType === event.actuatorType
 	);
 	if (!scalarCmd) {
-		console.warn(`Actuator not found: ${event.actuatorType} on ${device.name}`);
+		console.warn(`Actuator type ${event.actuatorType} not found on ${device.name}`);
 		return;
 	}
 
@@ -576,4 +604,15 @@ onMount(() => {
         onSave={handleSaveRecording}
         onCancel={handleCancelSave}
     />
+
+    <!-- Device Mapping Dialog -->
+    {#if data.recording}
+        <DeviceMappingDialog
+            open={showMappingDialog}
+            recordedDevices={data.recording.device_info}
+            connectedDevices={devices}
+            onConfirm={handleMappingConfirm}
+            onCancel={handleMappingCancel}
+        />
+    {/if}
 </div>
