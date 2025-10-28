@@ -27,6 +27,14 @@ let images = $derived(
 		thumbnail: getAssetUrl(p.id, "thumbnail"),
 	})),
 );
+
+// Calculate total likes and plays from all videos
+let totalLikes = $derived(
+	data.videos.reduce((sum, video) => sum + (video.likes_count || 0), 0)
+);
+let totalPlays = $derived(
+	data.videos.reduce((sum, video) => sum + (video.plays_count || 0), 0)
+);
 </script>
 
 <Meta
@@ -171,32 +179,26 @@ let images = $derived(
 
       <!-- Stats -->
       <div
-        class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-border/50"
+        class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-border/50"
       >
-        <!-- <div class="text-center">
-          <div class="text-2xl font-bold text-primary">
-            {data.model.subscribers}
-          </div>
-          <div class="text-sm text-muted-foreground">Followers</div>
-        </div> -->
         <div class="text-center">
           <div class="text-2xl font-bold text-primary">
             {data.videos.length}
           </div>
           <div class="text-sm text-muted-foreground">{$_('models.videos')}</div>
         </div>
-        <!-- <div class="text-center">
+        <div class="text-center">
           <div class="text-2xl font-bold text-primary">
-            {data.model.stats.totalViews}
+            {totalLikes.toLocaleString()}
           </div>
-          <div class="text-sm text-muted-foreground">Total Views</div>
-        </div> -->
-        <!-- <div class="text-center">
+          <div class="text-sm text-muted-foreground">Total Likes</div>
+        </div>
+        <div class="text-center">
           <div class="text-2xl font-bold text-primary">
-            {data.model.stats.likes}
+            {totalPlays.toLocaleString()}
           </div>
-          <div class="text-sm text-muted-foreground">Likes</div>
-        </div> -->
+          <div class="text-sm text-muted-foreground">Total Plays</div>
+        </div>
         <div class="text-center">
           <div class="text-2xl font-bold text-primary">
             {data.commentsCount}
@@ -267,15 +269,18 @@ let images = $derived(
                 >
                   {video.title}
                 </h3>
-                <!-- <div
+                <div
                   class="flex items-center justify-between text-sm text-muted-foreground"
                 >
-                  <span>{video.views} views</span>
                   <div class="flex items-center gap-1">
-                    <HeartIcon class="w-4 h-4" />
-                    {video.likes}
+                    <span class="icon-[ri--play-fill] w-4 h-4"></span>
+                    {video.plays_count || 0}
                   </div>
-                </div> -->
+                  <div class="flex items-center gap-1">
+                    <span class="icon-[ri--heart-fill] w-4 h-4"></span>
+                    {video.likes_count || 0}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           {/each}

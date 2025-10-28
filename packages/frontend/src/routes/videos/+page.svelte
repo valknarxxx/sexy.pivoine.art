@@ -17,7 +17,7 @@ import { formatVideoDuration } from "$lib/utils";
 const timeAgo = new TimeAgo("en");
 
 let searchQuery = $state("");
-let sortBy = $state("trending");
+let sortBy = $state("recent");
 let categoryFilter = $state("all");
 let durationFilter = $state("all");
 
@@ -42,20 +42,14 @@ const filteredVideos = $derived(() => {
 			return matchesSearch && matchesCategory && matchesDuration;
 		})
 		.sort((a, b) => {
-			// if (sortBy === "trending")
-			//   return (
-			//     parseInt(b.views.replace(/[^\d]/g, "")) -
-			//     parseInt(a.views.replace(/[^\d]/g, ""))
-			//   );
 			if (sortBy === "recent")
 				return (
 					new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime()
 				);
-			// if (sortBy === "popular")
-			//   return (
-			//     parseInt(b.likes.replace(/[^\d]/g, "")) -
-			//     parseInt(a.likes.replace(/[^\d]/g, ""))
-			//   );
+			if (sortBy === "most_liked")
+				return (b.likes_count || 0) - (a.likes_count || 0);
+			if (sortBy === "most_played")
+				return (b.plays_count || 0) - (a.plays_count || 0);
 			if (sortBy === "duration") return b.movie.duration - a.movie.duration;
 			return a.title.localeCompare(b.title);
 		});
@@ -175,23 +169,23 @@ const filteredVideos = $derived(() => {
             <SelectTrigger
               class="w-full lg:w-48 bg-background/50 border-primary/20 focus:border-primary"
             >
-              {sortBy === 'trending'
-                ? $_('videos.sort.trending')
-                : sortBy === 'recent'
-                  ? $_('videos.sort.recent')
-                  : sortBy === 'popular'
-                    ? $_('videos.sort.popular')
+              {sortBy === 'recent'
+                ? $_('videos.sort.recent')
+                : sortBy === 'most_liked'
+                  ? $_('videos.sort.most_liked')
+                  : sortBy === 'most_played'
+                    ? $_('videos.sort.most_played')
                     : sortBy === 'duration'
                       ? $_('videos.sort.duration')
                       : $_('videos.sort.name')}
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="trending"
-                >{$_('videos.sort.trending')}</SelectItem
-              >
               <SelectItem value="recent">{$_('videos.sort.recent')}</SelectItem>
-              <SelectItem value="popular"
-                >{$_('videos.sort.popular')}</SelectItem
+              <SelectItem value="most_liked"
+                >{$_('videos.sort.most_liked')}</SelectItem
+              >
+              <SelectItem value="most_played"
+                >{$_('videos.sort.most_played')}</SelectItem
               >
               <SelectItem value="duration"
                 >{$_('videos.sort.duration')}</SelectItem

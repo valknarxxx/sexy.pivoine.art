@@ -274,6 +274,8 @@ export default {
 			trending: "Trending",
 			recent: "Most Recent",
 			popular: "Most Liked",
+			most_liked: "Most Liked",
+			most_played: "Most Played",
 			duration: "By Duration",
 			name: "A-Z",
 		},
