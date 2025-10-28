@@ -20,6 +20,9 @@ export default {
 		open: "Open",
 		yes: "Yes",
 		no: "No",
+		my_profile: "My Profile",
+		anonymous: "Anonymous",
+		load_more: "Load More",
 	},
 	header: {
 		home: "Home",

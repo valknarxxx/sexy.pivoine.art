@@ -437,9 +437,29 @@ onMount(() => {
                 >
                     {$_("play.title")}
                 </h1>
-                <p class="text-lg text-muted-foreground mb-10">
+                <p class="text-lg text-muted-foreground mb-6">
                     {$_("play.description")}
                 </p>
+                <div class="flex justify-center gap-3 mb-10">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        href="/leaderboard"
+                        class="border-primary/30 hover:bg-primary/10"
+                    >
+                        <span class="icon-[ri--trophy-line] w-4 h-4 mr-2"></span>
+                        {$_("gamification.leaderboard")}
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        href="/me"
+                        class="border-primary/30 hover:bg-primary/10"
+                    >
+                        <span class="icon-[ri--user-line] w-4 h-4 mr-2"></span>
+                        {$_("common.my_profile")}
+                    </Button>
+                </div>
                 <div class="flex justify-center gap-4 items-center">
                     <Button
                         size="lg"

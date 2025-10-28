@@ -929,5 +929,119 @@ export default {
 				res.status(500).json({ error: error.message || "Failed to update play" });
 			}
 		});
+
+		// GET /sexy/community-recordings - List community shared recordings
+		router.get("/community-recordings", async (req, res) => {
+			try {
+				const limit = parseInt(req.query.limit as string) || 50;
+				const offset = parseInt(req.query.offset as string) || 0;
+
+				const recordingsService = new ItemsService("sexy_recordings", {
+					schema: await getSchema(),
+					accountability: null, // Public endpoint, no auth required
+					knex: database,
+				});
+
+				const recordings = await recordingsService.readByQuery({
+					filter: {
+						status: { _eq: "published" },
+						public: { _eq: true },
+					},
+					fields: [
+						"id",
+						"title",
+						"description",
+						"slug",
+						"duration",
+						"tags",
+						"date_created",
+						"user_created.id",
+						"user_created.first_name",
+						"user_created.last_name",
+						"user_created.avatar",
+					],
+					limit,
+					offset,
+					sort: ["-date_created"],
+				});
+
+				res.json({ data: recordings });
+			} catch (error: any) {
+				console.error("List community recordings error:", error);
+				res.status(500).json({ error: error.message || "Failed to list community recordings" });
+			}
+		});
+
+		// POST /sexy/recordings/:id/duplicate - Duplicate a community recording to current user
+		router.post("/recordings/:id/duplicate", async (req, res) => {
+			try {
+				const accountability = req.accountability;
+				if (!accountability?.user) {
+					return res.status(401).json({ error: "Authentication required" });
+				}
+
+				const recordingId = req.params.id;
+
+				// Fetch the original recording
+				const schema = await getSchema();
+				const recordingsService = new ItemsService("sexy_recordings", {
+					schema,
+					accountability: null, // Need to read any public recording
+					knex: database,
+				});
+
+				const originalRecording = await recordingsService.readOne(recordingId, {
+					fields: [
+						"id",
+						"title",
+						"description",
+						"duration",
+						"events",
+						"device_info",
+						"tags",
+						"status",
+						"public",
+					],
+				});
+
+				// Verify it's a published, public recording
+				if (originalRecording.status !== "published" || !originalRecording.public) {
+					return res.status(403).json({ error: "Recording is not publicly shared" });
+				}
+
+				// Create duplicate with current user's accountability
+				const userRecordingsService = new ItemsService("sexy_recordings", {
+					schema,
+					accountability,
+					knex: database,
+				});
+
+				// Generate unique slug
+				const baseSlug = originalRecording.title
+					.toLowerCase()
+					.replace(/[^a-z0-9]+/g, "-")
+					.replace(/^-|-$/g, "");
+				const timestamp = Date.now();
+				const slug = `${baseSlug}-copy-${timestamp}`;
+
+				const duplicatedRecording = await userRecordingsService.createOne({
+					title: `${originalRecording.title} (Copy)`,
+					description: originalRecording.description,
+					slug,
+					duration: originalRecording.duration,
+					events: originalRecording.events,
+					device_info: originalRecording.device_info,
+					tags: originalRecording.tags || [],
+					status: "draft",
+					public: false,
+					original_recording_id: recordingId,
+				});
+
+				res.status(201).json({ data: duplicatedRecording });
+			} catch (error: any) {
+				console.error("Duplicate recording error:", error);
+				res.status(500).json({ error: error.message || "Failed to duplicate recording" });
+			}
+		});
 	},
 };
