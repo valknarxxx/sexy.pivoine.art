@@ -180,3 +180,24 @@ export interface VideoPlayResponse {
 	play_id: string;
 	plays_count: number;
 }
+
+export interface VideoAnalytics {
+	id: string;
+	title: string;
+	slug: string;
+	upload_date: Date;
+	likes: number;
+	plays: number;
+	completed_plays: number;
+	completion_rate: number;
+	avg_watch_time: number;
+}
+
+export interface Analytics {
+	total_videos: number;
+	total_likes: number;
+	total_plays: number;
+	plays_by_date: Record<string, number>;
+	likes_by_date: Record<string, number>;
+	videos: VideoAnalytics[];
+}

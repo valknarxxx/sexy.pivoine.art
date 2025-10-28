@@ -234,7 +234,7 @@ onMount(() => {
 
         <!-- Dashboard Tabs -->
         <Tabs bind:value={activeTab} class="w-full">
-            <TabsList class="grid w-full grid-cols-2 max-w-2xl mb-8">
+            <TabsList class="grid w-full {data.analytics ? 'grid-cols-3' : 'grid-cols-2'} max-w-2xl mb-8">
                 <TabsTrigger value="settings" class="flex items-center gap-2">
                     <span class="icon-[ri--settings-4-line] w-4 h-4"></span>
                     {$_("me.settings.title")}
@@ -243,6 +243,12 @@ onMount(() => {
                     <span class="icon-[ri--play-list-2-line] w-4 h-4"></span>
                     {$_("me.recordings.title")}
                 </TabsTrigger>
+                {#if data.analytics}
+                    <TabsTrigger value="analytics" class="flex items-center gap-2">
+                        <span class="icon-[ri--line-chart-line] w-4 h-4"></span>
+                        Analytics
+                    </TabsTrigger>
+                {/if}
             </TabsList>
 
             <!-- Settings Tab -->
@@ -550,6 +556,105 @@ onMount(() => {
                     </div>
                 {/if}
             </TabsContent>
+
+            <!-- Analytics Tab -->
+            {#if data.analytics}
+                <TabsContent value="analytics" class="space-y-6">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-card-foreground">
+                            Analytics Dashboard
+                        </h2>
+                        <p class="text-muted-foreground">
+                            Track your content performance and audience engagement
+                        </p>
+                    </div>
+
+                    <!-- Overview Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <Card class="bg-card/50 border-primary/20">
+                            <CardHeader>
+                                <CardTitle class="flex items-center gap-2">
+                                    <span class="icon-[ri--video-line] w-5 h-5 text-primary"></span>
+                                    Total Videos
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p class="text-3xl font-bold">{data.analytics.total_videos}</p>
+                            </CardContent>
+                        </Card>
+                        <Card class="bg-card/50 border-primary/20">
+                            <CardHeader>
+                                <CardTitle class="flex items-center gap-2">
+                                    <span class="icon-[ri--heart-fill] w-5 h-5 text-primary"></span>
+                                    Total Likes
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p class="text-3xl font-bold">{data.analytics.total_likes.toLocaleString()}</p>
+                            </CardContent>
+                        </Card>
+                        <Card class="bg-card/50 border-primary/20">
+                            <CardHeader>
+                                <CardTitle class="flex items-center gap-2">
+                                    <span class="icon-[ri--play-fill] w-5 h-5 text-primary"></span>
+                                    Total Plays
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p class="text-3xl font-bold">{data.analytics.total_plays.toLocaleString()}</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <!-- Video Performance Table -->
+                    <Card class="bg-card/50 border-primary/20">
+                        <CardHeader>
+                            <CardTitle>Video Performance</CardTitle>
+                            <CardDescription>Detailed metrics for each video</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="border-b border-border">
+                                            <th class="text-left p-3">Title</th>
+                                            <th class="text-right p-3">Likes</th>
+                                            <th class="text-right p-3">Plays</th>
+                                            <th class="text-right p-3">Completion Rate</th>
+                                            <th class="text-right p-3">Avg Watch Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {#each data.analytics.videos as video}
+                                            <tr class="border-b border-border/50 hover:bg-primary/5 transition-colors">
+                                                <td class="p-3">
+                                                    <a href="/videos/{video.slug}" class="hover:text-primary transition-colors">
+                                                        {video.title}
+                                                    </a>
+                                                </td>
+                                                <td class="text-right p-3 font-medium">
+                                                    {video.likes}
+                                                </td>
+                                                <td class="text-right p-3 font-medium">
+                                                    {video.plays}
+                                                </td>
+                                                <td class="text-right p-3">
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs {video.completion_rate >= 70 ? 'bg-green-500/20 text-green-500' : video.completion_rate >= 40 ? 'bg-yellow-500/20 text-yellow-500' : 'bg-red-500/20 text-red-500'}">
+                                                        {video.completion_rate.toFixed(1)}%
+                                                    </span>
+                                                </td>
+                                                <td class="text-right p-3 text-muted-foreground">
+                                                    {Math.floor(video.avg_watch_time / 60)}:{(video.avg_watch_time % 60).toString().padStart(2, '0')}
+                                                </td>
+                                            </tr>
+                                        {/each}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            {/if}
         </Tabs>
     </div>
 </div>

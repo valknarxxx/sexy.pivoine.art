@@ -421,5 +421,130 @@ export default {
 				res.status(500).json({ error: error.message || "Failed to update play" });
 			}
 		});
+
+		// GET /sexy/analytics - Get analytics for the authenticated user's content
+		router.get("/analytics", async (req, res) => {
+			const accountability = req.accountability;
+			if (!accountability?.user) {
+				return res.status(401).json({ error: "Unauthorized" });
+			}
+
+			try {
+				const userId = accountability.user;
+
+				// Get all videos by this user
+				const videosService = new ItemsService("sexy_videos", {
+					schema: await getSchema(),
+				});
+
+				const videos = await videosService.readByQuery({
+					filter: {
+						models: {
+							directus_users_id: {
+								_eq: userId,
+							},
+						},
+					},
+					fields: ["id", "title", "slug", "likes_count", "plays_count", "upload_date"],
+					limit: -1,
+				});
+
+				if (videos.length === 0) {
+					return res.json({
+						total_videos: 0,
+						total_likes: 0,
+						total_plays: 0,
+						videos: [],
+					});
+				}
+
+				const videoIds = videos.map((v) => v.id);
+
+				// Get play analytics
+				const playsService = new ItemsService("sexy_video_plays", {
+					schema: await getSchema(),
+				});
+
+				const plays = await playsService.readByQuery({
+					filter: {
+						video_id: {
+							_in: videoIds,
+						},
+					},
+					fields: ["video_id", "date_created", "duration_watched", "completed"],
+					limit: -1,
+				});
+
+				// Get like analytics
+				const likesService = new ItemsService("sexy_video_likes", {
+					schema: await getSchema(),
+				});
+
+				const likes = await likesService.readByQuery({
+					filter: {
+						video_id: {
+							_in: videoIds,
+						},
+					},
+					fields: ["video_id", "date_created"],
+					limit: -1,
+				});
+
+				// Calculate totals
+				const totalLikes = videos.reduce((sum, v) => sum + (v.likes_count || 0), 0);
+				const totalPlays = videos.reduce((sum, v) => sum + (v.plays_count || 0), 0);
+
+				// Group plays by date for timeline
+				const playsByDate = plays.reduce((acc, play) => {
+					const date = new Date(play.date_created).toISOString().split("T")[0];
+					if (!acc[date]) acc[date] = 0;
+					acc[date]++;
+					return acc;
+				}, {});
+
+				// Group likes by date for timeline
+				const likesByDate = likes.reduce((acc, like) => {
+					const date = new Date(like.date_created).toISOString().split("T")[0];
+					if (!acc[date]) acc[date] = 0;
+					acc[date]++;
+					return acc;
+				}, {});
+
+				// Video-specific analytics
+				const videoAnalytics = videos.map((video) => {
+					const videoPlays = plays.filter((p) => p.video_id === video.id);
+					const completedPlays = videoPlays.filter((p) => p.completed).length;
+					const avgWatchTime =
+						videoPlays.length > 0
+							? videoPlays.reduce((sum, p) => sum + (p.duration_watched || 0), 0) /
+							  videoPlays.length
+							: 0;
+
+					return {
+						id: video.id,
+						title: video.title,
+						slug: video.slug,
+						upload_date: video.upload_date,
+						likes: video.likes_count || 0,
+						plays: video.plays_count || 0,
+						completed_plays: completedPlays,
+						completion_rate: video.plays_count ? (completedPlays / video.plays_count) * 100 : 0,
+						avg_watch_time: Math.round(avgWatchTime),
+					};
+				});
+
+				res.json({
+					total_videos: videos.length,
+					total_likes: totalLikes,
+					total_plays: totalPlays,
+					plays_by_date: playsByDate,
+					likes_by_date: likesByDate,
+					videos: videoAnalytics,
+				});
+			} catch (error: any) {
+				console.error("Analytics error:", error);
+				res.status(500).json({ error: error.message || "Failed to get analytics" });
+			}
+		});
 	},
 };

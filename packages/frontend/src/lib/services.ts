@@ -16,7 +16,7 @@ import {
 	readComments,
 	aggregate,
 } from "@directus/sdk";
-import type { Article, Model, Recording, Stats, User, Video, VideoLikeStatus, VideoLikeResponse, VideoPlayResponse } from "$lib/types";
+import type { Analytics, Article, Model, Recording, Stats, User, Video, VideoLikeStatus, VideoLikeResponse, VideoPlayResponse } from "$lib/types";
 import { PUBLIC_URL } from "$env/static/public";
 import { logger } from "$lib/logger";
 
@@ -720,5 +720,21 @@ export async function updateVideoPlay(
 			);
 		},
 		{ videoId, playId, durationWatched, completed }
+	);
+}
+
+export async function getAnalytics(fetch?: typeof globalThis.fetch) {
+	return loggedApiCall(
+		"getAnalytics",
+		async () => {
+			const directus = getDirectusInstance(fetch);
+			return directus.request<Analytics>(
+				customEndpoint({
+					method: "GET",
+					path: "/sexy/analytics",
+				})
+			);
+		},
+		{}
 	);
 }
