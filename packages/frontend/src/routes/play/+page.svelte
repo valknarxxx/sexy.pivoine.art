@@ -22,8 +22,6 @@ import DeviceCard from "$lib/components/device-card/device-card.svelte";
 import RecordingSaveDialog from "./components/recording-save-dialog.svelte";
 import type { BluetoothDevice, RecordedEvent, DeviceInfo } from "$lib/types";
 import { toast } from "svelte-sonner";
-import { customEndpoint } from "@directus/sdk";
-import { getDirectusInstance } from "$lib/directus";
 
 const client = new ButtplugClient("Sexy.Art");
 let connected = $state(client.connected);
@@ -191,25 +189,25 @@ async function handleSaveRecording(data: {
 	}));
 
 	try {
-		const directus = getDirectusInstance();
-		await directus.request(
-			customEndpoint({
-				method: "POST",
-				path: "/sexy/recordings",
-				body: JSON.stringify({
-					title: data.title,
-					description: data.description,
-					duration: recordingDuration,
-					events: recordedEvents,
-					device_info: deviceInfo,
-					tags: data.tags,
-					status: "draft",
-				}),
-				headers: {
-					"Content-Type": "application/json",
-				},
+		const response = await fetch("/api/sexy/recordings", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				title: data.title,
+				description: data.description,
+				duration: recordingDuration,
+				events: recordedEvents,
+				device_info: deviceInfo,
+				tags: data.tags,
+				status: "draft",
 			}),
-		);
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 
 		toast.success("Recording saved successfully!");
 		showSaveDialog = false;

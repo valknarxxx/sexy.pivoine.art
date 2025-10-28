@@ -60,7 +60,7 @@ export default {
 
 		// GET /sexy/recordings - List user's recordings
 		router.get("/recordings", async (req, res) => {
-			const { accountability } = context;
+			const accountability = req.accountability;
 			if (!accountability?.user) {
 				return res.status(401).json({ error: "Unauthorized" });
 			}
@@ -93,7 +93,7 @@ export default {
 
 		// GET /sexy/recordings/:id - Get single recording
 		router.get("/recordings/:id", async (req, res) => {
-			const { accountability } = context;
+			const accountability = req.accountability;
 			if (!accountability?.user) {
 				return res.status(401).json({ error: "Unauthorized" });
 			}
@@ -122,7 +122,7 @@ export default {
 
 		// POST /sexy/recordings - Create new recording
 		router.post("/recordings", async (req, res) => {
-			const { accountability } = context;
+			const accountability = req.accountability;
 			if (!accountability?.user) {
 				return res.status(401).json({ error: "Unauthorized" });
 			}
@@ -168,13 +168,17 @@ export default {
 
 				res.status(201).json(recording);
 			} catch (error: any) {
-				res.status(500).json({ error: error.message || "Failed to create recording" });
+				console.error("Failed to create recording:", error);
+				res.status(500).json({
+					error: error.message || "Failed to create recording",
+					details: error.toString()
+				});
 			}
 		});
 
 		// PATCH /sexy/recordings/:id - Update recording
 		router.patch("/recordings/:id", async (req, res) => {
-			const { accountability } = context;
+			const accountability = req.accountability;
 			if (!accountability?.user) {
 				return res.status(401).json({ error: "Unauthorized" });
 			}
@@ -217,7 +221,7 @@ export default {
 
 		// DELETE /sexy/recordings/:id - Delete (archive) recording
 		router.delete("/recordings/:id", async (req, res) => {
-			const { accountability } = context;
+			const accountability = req.accountability;
 			if (!accountability?.user) {
 				return res.status(401).json({ error: "Unauthorized" });
 			}

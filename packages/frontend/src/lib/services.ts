@@ -566,6 +566,38 @@ export async function getRecordings(fetch?: typeof globalThis.fetch) {
 	);
 }
 
+export async function createRecording(
+	recording: {
+		title: string;
+		description?: string;
+		duration: number;
+		events: unknown[];
+		device_info: unknown[];
+		tags?: string[];
+		status?: string;
+	},
+	fetch?: typeof globalThis.fetch,
+) {
+	return loggedApiCall(
+		"createRecording",
+		async () => {
+			const directus = getDirectusInstance(fetch);
+			const response = await directus.request<Recording>(
+				customEndpoint({
+					method: "POST",
+					path: "/sexy/recordings",
+					body: JSON.stringify(recording),
+					headers: {
+						"Content-Type": "application/json",
+					},
+				}),
+			);
+			return response;
+		},
+		{ title: recording.title, eventCount: recording.events.length },
+	);
+}
+
 export async function deleteRecording(id: string) {
 	return loggedApiCall(
 		"deleteRecording",

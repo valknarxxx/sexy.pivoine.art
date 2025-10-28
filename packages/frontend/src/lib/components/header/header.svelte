@@ -127,7 +127,7 @@ function isActiveLink(link: any) {
 
             <LogoutButton
               user={{
-                name: authStatus.user!.artist_name,
+                name: authStatus.user!.artist_name || authStatus.user!.email.split('@')[0] || 'User',
                 avatar: getAssetUrl(authStatus.user!.avatar?.id, 'mini')!,
                 email: authStatus.user!.email
               }}
