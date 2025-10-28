@@ -16,7 +16,7 @@ import {
 	readComments,
 	aggregate,
 } from "@directus/sdk";
-import type { Article, Model, Recording, Stats, User, Video } from "$lib/types";
+import type { Article, Model, Recording, Stats, User, Video, VideoLikeStatus, VideoLikeResponse, VideoPlayResponse } from "$lib/types";
 import { PUBLIC_URL } from "$env/static/public";
 import { logger } from "$lib/logger";
 
@@ -628,5 +628,97 @@ export async function getRecording(id: string, fetch?: typeof globalThis.fetch) 
 			return response;
 		},
 		{ id },
+	);
+}
+
+export async function likeVideo(videoId: string) {
+	return loggedApiCall(
+		"likeVideo",
+		async () => {
+			const directus = getDirectusInstance(fetch);
+			return directus.request<VideoLikeResponse>(
+				customEndpoint({
+					method: "POST",
+					path: `/sexy/videos/${videoId}/like`,
+				})
+			);
+		},
+		{ videoId }
+	);
+}
+
+export async function unlikeVideo(videoId: string) {
+	return loggedApiCall(
+		"unlikeVideo",
+		async () => {
+			const directus = getDirectusInstance(fetch);
+			return directus.request<VideoLikeResponse>(
+				customEndpoint({
+					method: "DELETE",
+					path: `/sexy/videos/${videoId}/like`,
+				})
+			);
+		},
+		{ videoId }
+	);
+}
+
+export async function getVideoLikeStatus(videoId: string, fetch?: typeof globalThis.fetch) {
+	return loggedApiCall(
+		"getVideoLikeStatus",
+		async () => {
+			const directus = getDirectusInstance(fetch);
+			return directus.request<VideoLikeStatus>(
+				customEndpoint({
+					method: "GET",
+					path: `/sexy/videos/${videoId}/like-status`,
+				})
+			);
+		},
+		{ videoId }
+	);
+}
+
+export async function recordVideoPlay(videoId: string, sessionId?: string) {
+	return loggedApiCall(
+		"recordVideoPlay",
+		async () => {
+			const directus = getDirectusInstance(fetch);
+			return directus.request<VideoPlayResponse>(
+				customEndpoint({
+					method: "POST",
+					path: `/sexy/videos/${videoId}/play`,
+					body: JSON.stringify({ session_id: sessionId }),
+					headers: { "Content-Type": "application/json" },
+				})
+			);
+		},
+		{ videoId }
+	);
+}
+
+export async function updateVideoPlay(
+	videoId: string,
+	playId: string,
+	durationWatched: number,
+	completed: boolean
+) {
+	return loggedApiCall(
+		"updateVideoPlay",
+		async () => {
+			const directus = getDirectusInstance(fetch);
+			return directus.request(
+				customEndpoint({
+					method: "PATCH",
+					path: `/sexy/videos/${videoId}/play/${playId}`,
+					body: JSON.stringify({
+						duration_watched: durationWatched,
+						completed,
+					}),
+					headers: { "Content-Type": "application/json" },
+				})
+			);
+		},
+		{ videoId, playId, durationWatched, completed }
 	);
 }

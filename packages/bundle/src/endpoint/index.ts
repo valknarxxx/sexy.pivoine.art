@@ -249,5 +249,177 @@ export default {
 				res.status(500).json({ error: error.message || "Failed to delete recording" });
 			}
 		});
+
+		// POST /sexy/videos/:id/like - Like a video
+		router.post("/videos/:id/like", async (req, res) => {
+			const accountability = req.accountability;
+			if (!accountability?.user) {
+				return res.status(401).json({ error: "Unauthorized" });
+			}
+
+			const videoId = req.params.id;
+			const userId = accountability.user;
+
+			try {
+				const likesService = new ItemsService("sexy_video_likes", {
+					schema: await getSchema(),
+					accountability,
+				});
+
+				// Check if already liked
+				const existing = await likesService.readByQuery({
+					filter: { video_id: videoId, user_id: userId },
+					limit: 1,
+				});
+
+				if (existing.length > 0) {
+					return res.status(400).json({ error: "Already liked" });
+				}
+
+				// Create like
+				await likesService.createOne({
+					video_id: videoId,
+					user_id: userId,
+				});
+
+				// Increment likes_count
+				const videosService = new ItemsService("sexy_videos", {
+					schema: await getSchema(),
+				});
+				const video = await videosService.readOne(videoId);
+				await videosService.updateOne(videoId, {
+					likes_count: (video.likes_count || 0) + 1,
+				});
+
+				res.json({ liked: true, likes_count: (video.likes_count || 0) + 1 });
+			} catch (error: any) {
+				res.status(500).json({ error: error.message || "Failed to like video" });
+			}
+		});
+
+		// DELETE /sexy/videos/:id/like - Unlike a video
+		router.delete("/videos/:id/like", async (req, res) => {
+			const accountability = req.accountability;
+			if (!accountability?.user) {
+				return res.status(401).json({ error: "Unauthorized" });
+			}
+
+			const videoId = req.params.id;
+			const userId = accountability.user;
+
+			try {
+				const likesService = new ItemsService("sexy_video_likes", {
+					schema: await getSchema(),
+					accountability,
+				});
+
+				// Find and delete like
+				const existing = await likesService.readByQuery({
+					filter: { video_id: videoId, user_id: userId },
+					limit: 1,
+				});
+
+				if (existing.length === 0) {
+					return res.status(400).json({ error: "Not liked" });
+				}
+
+				await likesService.deleteOne(existing[0].id);
+
+				// Decrement likes_count
+				const videosService = new ItemsService("sexy_videos", {
+					schema: await getSchema(),
+				});
+				const video = await videosService.readOne(videoId);
+				await videosService.updateOne(videoId, {
+					likes_count: Math.max((video.likes_count || 0) - 1, 0),
+				});
+
+				res.json({ liked: false, likes_count: Math.max((video.likes_count || 0) - 1, 0) });
+			} catch (error: any) {
+				res.status(500).json({ error: error.message || "Failed to unlike video" });
+			}
+		});
+
+		// GET /sexy/videos/:id/like-status - Get like status for a video
+		router.get("/videos/:id/like-status", async (req, res) => {
+			const accountability = req.accountability;
+			if (!accountability?.user) {
+				return res.json({ liked: false });
+			}
+
+			const videoId = req.params.id;
+			const userId = accountability.user;
+
+			try {
+				const likesService = new ItemsService("sexy_video_likes", {
+					schema: await getSchema(),
+					accountability,
+				});
+
+				const existing = await likesService.readByQuery({
+					filter: { video_id: videoId, user_id: userId },
+					limit: 1,
+				});
+
+				res.json({ liked: existing.length > 0 });
+			} catch (error: any) {
+				res.status(500).json({ error: error.message || "Failed to get like status" });
+			}
+		});
+
+		// POST /sexy/videos/:id/play - Record a video play
+		router.post("/videos/:id/play", async (req, res) => {
+			const accountability = req.accountability;
+			const videoId = req.params.id;
+			const { session_id } = req.body;
+
+			try {
+				const playsService = new ItemsService("sexy_video_plays", {
+					schema: await getSchema(),
+				});
+
+				const videosService = new ItemsService("sexy_videos", {
+					schema: await getSchema(),
+				});
+
+				// Record play
+				const play = await playsService.createOne({
+					video_id: videoId,
+					user_id: accountability?.user || null,
+					session_id: session_id || null,
+				});
+
+				// Increment plays_count
+				const video = await videosService.readOne(videoId);
+				await videosService.updateOne(videoId, {
+					plays_count: (video.plays_count || 0) + 1,
+				});
+
+				res.json({ success: true, play_id: play, plays_count: (video.plays_count || 0) + 1 });
+			} catch (error: any) {
+				res.status(500).json({ error: error.message || "Failed to record play" });
+			}
+		});
+
+		// PATCH /sexy/videos/:id/play/:playId - Update play progress
+		router.patch("/videos/:id/play/:playId", async (req, res) => {
+			const { playId } = req.params;
+			const { duration_watched, completed } = req.body;
+
+			try {
+				const playsService = new ItemsService("sexy_video_plays", {
+					schema: await getSchema(),
+				});
+
+				await playsService.updateOne(playId, {
+					duration_watched,
+					completed,
+				});
+
+				res.json({ success: true });
+			} catch (error: any) {
+				res.status(500).json({ error: error.message || "Failed to update play" });
+			}
+		});
 	},
 };

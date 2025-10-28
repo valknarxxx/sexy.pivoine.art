@@ -89,6 +89,9 @@ export interface Video {
 	upload_date: Date;
 	premium?: boolean;
 	featured?: boolean;
+	likes_count?: number;
+	plays_count?: number;
+	views_count?: number;
 }
 
 export interface Comment {
@@ -154,4 +157,26 @@ export interface Recording {
 	linked_video?: string | Video;
 	featured?: boolean;
 	public?: boolean;
+}
+
+export interface VideoLikeStatus {
+	liked: boolean;
+}
+
+export interface VideoPlayRecord {
+	id: string;
+	video_id: string;
+	duration_watched?: number;
+	completed: boolean;
+}
+
+export interface VideoLikeResponse {
+	liked: boolean;
+	likes_count: number;
+}
+
+export interface VideoPlayResponse {
+	success: boolean;
+	play_id: string;
+	plays_count: number;
 }
