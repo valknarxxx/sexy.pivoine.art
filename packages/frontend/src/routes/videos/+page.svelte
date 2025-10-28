@@ -238,13 +238,15 @@ const filteredVideos = $derived(() => {
               </div>
             {/if}
 
-            <!-- Views -->
-            <!-- <div
-              class="absolute top-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1"
-            >
-              <EyeIcon class="w-3 h-3" />
-              {video.views}
-            </div> -->
+            <!-- Play Count -->
+            {#if video.plays_count}
+              <div
+                class="absolute top-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1"
+              >
+                <span class="icon-[ri--play-fill] w-3 h-3"></span>
+                {video.plays_count}
+              </div>
+            {/if}
 
             <!-- Play Overlay -->
             <a

@@ -15,18 +15,24 @@ import { AvatarFallback, AvatarImage } from "$lib/components/ui/avatar";
 import { formatVideoDuration, getUserInitials } from "$lib/utils";
 import { invalidateAll } from "$app/navigation";
 import { toast } from "svelte-sonner";
-import { createCommentForVideo } from "$lib/services";
+import { createCommentForVideo, likeVideo, unlikeVideo, recordVideoPlay, updateVideoPlay } from "$lib/services";
 import NewsletterSignup from "$lib/components/newsletter-signup/newsletter-signup-widget.svelte";
 import SharingPopupButton from "$lib/components/sharing-popup/sharing-popup-button.svelte";
 
+const { data } = $props();
+
 const timeAgo = new TimeAgo("en");
-let isLiked = $state(false);
+let isLiked = $state(data.likeStatus.liked);
+let likesCount = $state(data.video.likes_count || 0);
+let isLikeLoading = $state(false);
 let isBookmarked = $state(false);
 let newComment = $state("");
 let showComments = $state(true);
 let isCommentLoading = $state(false);
 let isCommentError = $state(false);
 let commentError = $state();
+let currentPlayId = $state<string | null>(null);
+let lastTrackedTime = $state(0);
 
 const relatedVideos = [
 	{
@@ -63,8 +69,30 @@ const relatedVideos = [
 	},
 ];
 
-function handleLike() {
-	isLiked = !isLiked;
+async function handleLike() {
+	if (!data.authStatus.authenticated) {
+		toast.error("Please sign in to like videos");
+		return;
+	}
+
+	try {
+		isLikeLoading = true;
+		if (isLiked) {
+			const result = await unlikeVideo(data.video.id);
+			likesCount = result.likes_count;
+			isLiked = false;
+			toast.success("Removed from liked videos");
+		} else {
+			const result = await likeVideo(data.video.id);
+			likesCount = result.likes_count;
+			isLiked = true;
+			toast.success("Added to liked videos");
+		}
+	} catch (error: any) {
+		toast.error(error.message || "Failed to update like");
+	} finally {
+		isLikeLoading = false;
+	}
 }
 
 function handleBookmark() {
@@ -90,9 +118,29 @@ async function handleComment(e: Event) {
 	}
 }
 
-let showPlayer = $state(false);
+async function handlePlay() {
+	showPlayer = true;
+	try {
+		const result = await recordVideoPlay(data.video.id);
+		currentPlayId = result.play_id;
+	} catch (error) {
+		console.error("Failed to record play:", error);
+	}
+}
 
-const { data } = $props();
+function handleTimeUpdate(e: Event) {
+	const video = e.target as HTMLVideoElement;
+	const currentTime = Math.floor(video.currentTime);
+
+	// Update every 10 seconds
+	if (currentPlayId && currentTime - lastTrackedTime >= 10) {
+		lastTrackedTime = currentTime;
+		const completed = video.currentTime >= video.duration * 0.9; // 90% watched = completed
+		updateVideoPlay(data.video.id, currentPlayId, currentTime, completed).catch(console.error);
+	}
+}
+
+let showPlayer = $state(false);
 </script>
 
 <Meta
@@ -121,6 +169,7 @@ const { data } = $props();
                   src={getAssetUrl(data.video.movie.id)}
                   poster={getAssetUrl(data.video.image, 'preview')}
                   autoplay
+                  ontimeupdate={handleTimeUpdate}
                   class="inline"
                 >
                   <track kind="captions" />
@@ -155,6 +204,21 @@ const { data } = $props();
                   ></span>
                 </button>
               </div>
+              <button
+                class="cursor-pointer absolute inset-0 bg-black/20 flex items-center justify-center"
+                aria-label={data.video.title}
+                data-umami-event="play-video"
+                data-umami-event-title={data.video.title}
+                data-umami-event-id={data.video.movie.id}
+                onclick={handlePlay}
+              >
+                <div
+                  class="w-20 h-20 bg-primary/90 hover:bg-primary rounded-full flex flex-col items-center justify-center transition-colors shadow-2xl"
+                >
+                  <span class="icon-[ri--play-large-fill] w-10 h-10 text-white"
+                  ></span>
+                </div>
+              </button>
               <div
                 class="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded font-medium"
               >
@@ -196,16 +260,17 @@ const { data } = $props();
 
           <!-- Action Buttons -->
           <div class="flex flex-wrap gap-3">
-            <!-- <Button
+            <Button
               variant={isLiked ? "default" : "outline"}
               onclick={handleLike}
-              class="flex items-center gap-2 {isLiked
+              disabled={isLikeLoading}
+              class="flex items-center gap-2 cursor-pointer {isLiked
                 ? 'bg-gradient-to-r from-primary to-accent'
                 : 'border-primary/20 hover:bg-primary/10'}"
             >
-              <ThumbsUpIcon class="w-4 h-4 {isLiked ? 'fill-current' : ''}" />
-              {data.video.likes}
-            </Button> -->
+              <span class="icon-[ri--heart-{isLiked ? 'fill' : 'line'}] w-4 h-4"></span>
+              {likesCount}
+            </Button>
             <SharingPopupButton
               content={{
                 title: data.video.title,
@@ -221,9 +286,7 @@ const { data } = $props();
                 ? 'bg-gradient-to-r from-primary to-accent'
                 : 'border-primary/20 hover:bg-primary/10'}"
             >
-              <BookmarkIcon
-                class="w-4 h-4 {isBookmarked ? 'fill-current' : ''}"
-              />
+              <span class="icon-[ri--bookmark-{isBookmarked ? 'fill' : 'line'}] w-4 h-4"></span>
               Save
             </Button> -->
           </div>
