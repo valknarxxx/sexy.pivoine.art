@@ -27,6 +27,7 @@ export const calcReadingTime = (text: string) => {
 };
 
 export const getUserInitials = (name: string) => {
+	if (!name) return "??";
 	return name
 		.split(" ")
 		.map((word) => word.charAt(0))

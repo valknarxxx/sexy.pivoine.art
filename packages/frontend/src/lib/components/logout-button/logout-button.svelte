@@ -130,7 +130,7 @@ $effect(() => {
 			</AvatarFallback>
 		</Avatar>
 		<div class="text-left flex flex-col min-w-0 flex-1">
-			<span class="text-sm font-medium text-foreground leading-none truncate transition-all duration-200 {isNearThreshold ? 'text-destructive' : ''}" style="opacity: {Math.max(0.15, 1 - slideProgress * 1.5)}">{user.name.split(" ")[0]}</span>
+			<span class="text-sm font-medium text-foreground leading-none truncate transition-all duration-200 {isNearThreshold ? 'text-destructive' : ''}" style="opacity: {Math.max(0.15, 1 - slideProgress * 1.5)}">{user.name ? user.name.split(" ")[0] : "User"}</span>
 			<span class="text-xs text-muted-foreground leading-none transition-all duration-200 {isNearThreshold ? 'text-destructive/70' : ''}" style="opacity: {Math.max(0.1, 1 - slideProgress * 1.8)}">
 				{slideProgress > 0.3 ? "Logout" : "Online"}
 			</span>
