@@ -223,6 +223,13 @@ export default {
 			toast_reset: "Your password has been reset!",
 		},
 	},
+	profile: {
+		member_since: "Member since {date}",
+		comments: "Comments",
+		likes: "Likes",
+		edit: "Edit Profile",
+		activity: "Activity",
+	},
 	models: {
 		title: "Our Models",
 		description:

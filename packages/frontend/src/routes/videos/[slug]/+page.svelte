@@ -442,26 +442,28 @@ let showPlayer = $state(false);
                 <div class="space-y-4">
                   {#each data.comments as comment}
                     <div class="flex gap-3">
-                      <Avatar
-                        class="h-8 w-8 ring-2 ring-accent/20 transition-all duration-200"
-                      >
-                        <AvatarImage
-                          src={getAssetUrl(
-                            comment.user_created.avatar as string,
-                            'mini'
-                          )}
-                          alt={comment.user_created.artist_name}
-                        />
-                        <AvatarFallback
-                          class="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-semibold transition-all duration-200"
+                      <a href="/users/{comment.user_created.id}" class="flex-shrink-0">
+                        <Avatar
+                          class="h-8 w-8 ring-2 ring-accent/20 hover:ring-primary/40 transition-all duration-200 cursor-pointer"
                         >
-                          {getUserInitials(data.authStatus.user!.artist_name)}
-                        </AvatarFallback>
-                      </Avatar>
+                          <AvatarImage
+                            src={getAssetUrl(
+                              comment.user_created.avatar as string,
+                              'mini'
+                            )}
+                            alt={comment.user_created.artist_name}
+                          />
+                          <AvatarFallback
+                            class="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-semibold transition-all duration-200"
+                          >
+                            {getUserInitials(comment.user_created.artist_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </a>
                       <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                          <span class="font-medium text-sm"
-                            >{comment.user_created.artist_name}</span
+                          <a href="/users/{comment.user_created.id}" class="font-medium text-sm hover:text-primary transition-colors"
+                            >{comment.user_created.artist_name}</a
                           >
                           <span class="text-xs text-muted-foreground"
                             >{timeAgo.format(
