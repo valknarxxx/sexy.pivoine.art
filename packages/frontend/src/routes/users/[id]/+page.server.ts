@@ -30,12 +30,20 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 		const likesData = await likesResponse.json();
 		const likesCount = likesData.data?.[0]?.count || 0;
 
+		// Fetch gamification data
+		const gamificationResponse = await fetch(`/api/sexy/gamification/user/${id}`);
+		let gamification = null;
+		if (gamificationResponse.ok) {
+			gamification = await gamificationResponse.json();
+		}
+
 		return {
 			user,
 			stats: {
 				comments_count: commentsCount,
 				likes_count: likesCount,
 			},
+			gamification,
 			isOwnProfile: locals.authStatus.user?.id === id,
 		};
 	} catch (error) {
