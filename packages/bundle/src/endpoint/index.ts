@@ -344,7 +344,7 @@ export default {
 					duration,
 					events,
 					device_info,
-					tags: Array.isArray(tags) ? tags : (typeof tags === 'string' ? (tags.startsWith('[') ? JSON.parse(tags) : []) : []),
+					tags: tags || [],
 					linked_video: linked_video || null,
 					status: status || "draft",
 					public: false,
