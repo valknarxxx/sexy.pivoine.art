@@ -220,18 +220,17 @@ export async function getVideosForModel(id, fetch?: typeof globalThis.fetch) {
 
 export async function getFeaturedVideos(
 	limit: number,
-	fetch?: typeof globalThis.fetch,
+	fetchFn: typeof globalThis.fetch = globalThis.fetch,
 ) {
 	return loggedApiCall(
 		"getFeaturedVideos",
 		async () => {
-			const directus = getDirectusInstance(fetch);
-			return directus.request<Video[]>(
-				customEndpoint({
-					method: "GET",
-					path: `/sexy/videos?featured=true&limit=${limit}`,
-				}),
-			);
+			const url = `${PUBLIC_URL}/api/sexy/videos?featured=true&limit=${limit}`;
+			const response = await fetchFn(url);
+			if (!response.ok) {
+				throw new Error(`Failed to fetch featured videos: ${response.statusText}`);
+			}
+			return (await response.json()) as Video[];
 		},
 		{ limit },
 	);
@@ -290,18 +289,17 @@ export async function getModels(fetch?: typeof globalThis.fetch) {
 
 export async function getFeaturedModels(
 	limit = 3,
-	fetch?: typeof globalThis.fetch,
+	fetchFn: typeof globalThis.fetch = globalThis.fetch,
 ) {
 	return loggedApiCall(
 		"getFeaturedModels",
 		async () => {
-			const directus = getDirectusInstance(fetch);
-			return directus.request<Model[]>(
-				customEndpoint({
-					method: "GET",
-					path: `/sexy/models?featured=true&limit=${limit}`,
-				}),
-			);
+			const url = `${PUBLIC_URL}/api/sexy/models?featured=true&limit=${limit}`;
+			const response = await fetchFn(url);
+			if (!response.ok) {
+				throw new Error(`Failed to fetch featured models: ${response.statusText}`);
+			}
+			return (await response.json()) as Model[];
 		},
 		{ limit },
 	);
