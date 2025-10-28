@@ -22,7 +22,7 @@ const createPolicyFilter = (policy) => ({
 export default {
 	id: "sexy",
 	handler: (router, context) => {
-		const { services, getSchema } = context;
+		const { services, getSchema, database } = context;
 		const { ItemsService } = services;
 
 		router.get("/stats", async (_req, res) => {
@@ -62,25 +62,50 @@ export default {
 		router.get("/models", async (req, res) => {
 			try {
 				const { featured, limit } = req.query;
-				const usersService = new ItemsService("directus_users", {
-					schema: await getSchema(),
-					accountability: null,
-				});
 
-				const filter: any = createPolicyFilter("Model");
+				// Build query using Knex to bypass permissions
+				let query = database
+					.select("u.*")
+					.from("directus_users as u")
+					.leftJoin("directus_roles as r", "u.role", "r.id")
+					.where("r.name", "Model")
+					.orderBy("u.id", "desc");
+
 				if (featured === "true") {
-					filter._and = [filter, { featured: { _eq: true } }];
+					query = query.where("u.featured", true);
 				}
 
-				const models = await usersService.readByQuery({
-					filter,
-					fields: ["*", "photos.directus_files_id.*", "banner.*"],
-					sort: ["-id"],
-					limit: limit ? parseInt(limit as string) : -1,
-				});
+				if (limit) {
+					query = query.limit(parseInt(limit as string));
+				}
+
+				const models = await query;
+
+				// Fetch related photos and banner for each model
+				for (const model of models) {
+					// Fetch photos
+					const photos = await database
+						.select("df.*")
+						.from("sexy_model_photos as mp")
+						.leftJoin("directus_files as df", "mp.directus_files_id", "df.id")
+						.where("mp.directus_users_id", model.id);
+
+					model.photos = photos.map((p) => ({ directus_files_id: p }));
+
+					// Fetch banner
+					if (model.banner) {
+						const banner = await database
+							.select("*")
+							.from("directus_files")
+							.where("id", model.banner)
+							.first();
+						model.banner = banner;
+					}
+				}
 
 				res.json(models);
 			} catch (error: any) {
+				console.error("Models endpoint error:", error);
 				res.status(500).json({ error: error.message || "Failed to fetch models" });
 			}
 		});
