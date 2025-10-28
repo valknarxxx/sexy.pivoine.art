@@ -16,7 +16,7 @@ import {
 	readComments,
 	aggregate,
 } from "@directus/sdk";
-import type { Article, Model, Stats, User, Video } from "$lib/types";
+import type { Article, Model, Recording, Stats, User, Video } from "$lib/types";
 import { PUBLIC_URL } from "$env/static/public";
 import { logger } from "$lib/logger";
 
@@ -546,5 +546,38 @@ export async function getItemsByTag(
 			}
 		},
 		{ category, tag },
+	);
+}
+
+export async function getRecordings(fetch?: typeof globalThis.fetch) {
+	return loggedApiCall(
+		"getRecordings",
+		async () => {
+			const directus = getDirectusInstance(fetch);
+			const response = await directus.request<Recording[]>(
+				customEndpoint({
+					method: "GET",
+					path: "/sexy/recordings",
+				}),
+			);
+			return response;
+		},
+		{},
+	);
+}
+
+export async function deleteRecording(id: string) {
+	return loggedApiCall(
+		"deleteRecording",
+		async () => {
+			const directus = getDirectusInstance();
+			await directus.request(
+				customEndpoint({
+					method: "DELETE",
+					path: `/sexy/recordings/${id}`,
+				}),
+			);
+		},
+		{ id },
 	);
 }

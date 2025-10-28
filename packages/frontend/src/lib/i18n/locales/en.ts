@@ -118,6 +118,33 @@ export default {
 			confirm_password: "Confirm Password",
 			confirm_password_placeholder: "Confirm your password",
 		},
+		recordings: {
+			title: "Recordings",
+			description: "Manage your device recordings",
+			no_recordings: "You haven't created any recordings yet",
+			no_recordings_description:
+				"Start recording device patterns from the Play page to create interactive content",
+			go_to_play: "Go to Play",
+			loading: "Loading recordings...",
+			delete_confirm: "Are you sure you want to delete this recording?",
+			delete_success: "Recording deleted successfully",
+			delete_error: "Failed to delete recording",
+		},
+	},
+	recording_card: {
+		duration: "Duration",
+		events: "Events",
+		devices: "Devices",
+		created: "Created",
+		status_draft: "Draft",
+		status_published: "Published",
+		status_archived: "Archived",
+		play: "Play",
+		edit: "Edit",
+		delete: "Delete",
+		public: "Public",
+		private: "Private",
+		linked_video: "Linked to video",
 	},
 	auth: {
 		login: {

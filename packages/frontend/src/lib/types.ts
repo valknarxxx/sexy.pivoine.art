@@ -122,3 +122,36 @@ export interface ShareContent {
 	url: string;
 	type: "video" | "model" | "article" | "link";
 }
+
+export interface RecordedEvent {
+	timestamp: number;
+	deviceIndex: number;
+	deviceName: string;
+	actuatorIndex: number;
+	actuatorType: string;
+	value: number;
+}
+
+export interface DeviceInfo {
+	name: string;
+	index: number;
+	capabilities: string[];
+}
+
+export interface Recording {
+	id: string;
+	title: string;
+	description?: string;
+	slug: string;
+	duration: number;
+	events: RecordedEvent[];
+	device_info: DeviceInfo[];
+	user_created: string | User;
+	date_created: Date;
+	date_updated?: Date;
+	status: "draft" | "published" | "archived";
+	tags?: string[];
+	linked_video?: string | Video;
+	featured?: boolean;
+	public?: boolean;
+}

@@ -22,7 +22,7 @@ import { goto, invalidateAll } from "$app/navigation";
 import { getAssetUrl, isModel } from "$lib/directus";
 import * as Alert from "$lib/components/ui/alert";
 import { toast } from "svelte-sonner";
-import { removeFile, updateProfile, uploadFile } from "$lib/services";
+import { deleteRecording, removeFile, updateProfile, uploadFile } from "$lib/services";
 import { Textarea } from "$lib/components/ui/textarea";
 import Meta from "$lib/components/meta/meta.svelte";
 import { TagsInput } from "$lib/components/ui/tags-input";
@@ -32,8 +32,11 @@ import {
 	MEGABYTE,
 } from "$lib/components/ui/file-drop-zone";
 import * as Avatar from "$lib/components/ui/avatar";
+import RecordingCard from "$lib/components/recording-card/recording-card.svelte";
 
 const { data } = $props();
+
+let recordings = $state(data.recordings);
 
 let activeTab = $state("settings");
 
@@ -163,6 +166,25 @@ function setExistingAvatar() {
 	}
 }
 
+async function handleDeleteRecording(id: string) {
+	if (!confirm($_("me.recordings.delete_confirm"))) {
+		return;
+	}
+
+	try {
+		await deleteRecording(id);
+		recordings = recordings.filter((r) => r.id !== id);
+		toast.success($_("me.recordings.delete_success"));
+	} catch (error) {
+		toast.error($_("me.recordings.delete_error"));
+	}
+}
+
+function handlePlayRecording(id: string) {
+	// Navigate to play page with recording ID
+	goto(`/play?recording=${id}`);
+}
+
 onMount(() => {
 	if (data.authStatus.authenticated) {
 		setExistingAvatar();
@@ -212,10 +234,14 @@ onMount(() => {
 
         <!-- Dashboard Tabs -->
         <Tabs bind:value={activeTab} class="w-full">
-            <TabsList class="grid w-full grid-cols-4 max-w-2xl mb-8">
+            <TabsList class="grid w-full grid-cols-2 max-w-2xl mb-8">
                 <TabsTrigger value="settings" class="flex items-center gap-2">
                     <span class="icon-[ri--settings-4-line] w-4 h-4"></span>
                     {$_("me.settings.title")}
+                </TabsTrigger>
+                <TabsTrigger value="recordings" class="flex items-center gap-2">
+                    <span class="icon-[ri--play-list-2-line] w-4 h-4"></span>
+                    {$_("me.recordings.title")}
                 </TabsTrigger>
             </TabsList>
 
@@ -463,6 +489,66 @@ onMount(() => {
                         </CardContent>
                     </Card>
                 </div>
+            </TabsContent>
+
+            <!-- Recordings Tab -->
+            <TabsContent value="recordings" class="space-y-6">
+                <div class="mb-6 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-card-foreground">
+                            {$_("me.recordings.title")}
+                        </h2>
+                        <p class="text-muted-foreground">
+                            {$_("me.recordings.description")}
+                        </p>
+                    </div>
+                    <Button
+                        href="/play"
+                        class="cursor-pointer bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                    >
+                        <span class="icon-[ri--play-line] w-4 h-4 mr-2"></span>
+                        {$_("me.recordings.go_to_play")}
+                    </Button>
+                </div>
+
+                {#if recordings.length === 0}
+                    <Card class="bg-card/50 border-primary/20">
+                        <CardContent class="py-12">
+                            <div class="flex flex-col items-center justify-center text-center">
+                                <div
+                                    class="mb-4 p-4 rounded-full bg-muted/30 border border-border/30"
+                                >
+                                    <span
+                                        class="icon-[ri--play-list-2-line] w-12 h-12 text-muted-foreground"
+                                    ></span>
+                                </div>
+                                <h3 class="text-xl font-semibold mb-2">
+                                    {$_("me.recordings.no_recordings")}
+                                </h3>
+                                <p class="text-muted-foreground mb-6 max-w-md">
+                                    {$_("me.recordings.no_recordings_description")}
+                                </p>
+                                <Button
+                                    href="/play"
+                                    class="cursor-pointer bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                                >
+                                    <span class="icon-[ri--play-line] w-4 h-4 mr-2"></span>
+                                    {$_("me.recordings.go_to_play")}
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                {:else}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {#each recordings as recording (recording.id)}
+                            <RecordingCard
+                                {recording}
+                                onPlay={handlePlayRecording}
+                                onDelete={handleDeleteRecording}
+                            />
+                        {/each}
+                    </div>
+                {/if}
             </TabsContent>
         </Tabs>
     </div>

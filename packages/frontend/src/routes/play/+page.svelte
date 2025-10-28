@@ -19,12 +19,23 @@ import Button from "$lib/components/ui/button/button.svelte";
 import { onMount } from "svelte";
 import { goto } from "$app/navigation";
 import DeviceCard from "$lib/components/device-card/device-card.svelte";
-import type { BluetoothDevice } from "$lib/types";
+import RecordingSaveDialog from "./components/recording-save-dialog.svelte";
+import type { BluetoothDevice, RecordedEvent, DeviceInfo } from "$lib/types";
+import { toast } from "svelte-sonner";
+import { customEndpoint } from "@directus/sdk";
+import { getDirectusInstance } from "$lib/directus";
 
 const client = new ButtplugClient("Sexy.Art");
 let connected = $state(client.connected);
 let scanning = $state(false);
 let devices = $state<BluetoothDevice[]>([]);
+
+// Recording state
+let isRecording = $state(false);
+let recordingStartTime = $state<number | null>(null);
+let recordedEvents = $state<RecordedEvent[]>([]);
+let showSaveDialog = $state(false);
+let recordingDuration = $state(0);
 
 async function init() {
 	const connector = new ButtplugWasmClientConnector();
@@ -99,6 +110,49 @@ async function handleChange(
 			device.info.index,
 		),
 	);
+
+	// Capture event if recording
+	if (isRecording && recordingStartTime) {
+		captureEvent(device, scalarIndex, value);
+	}
+}
+
+function startRecording() {
+	if (devices.length === 0) {
+		return;
+	}
+	isRecording = true;
+	recordingStartTime = performance.now();
+	recordedEvents = [];
+	recordingDuration = 0;
+}
+
+function stopRecording() {
+	isRecording = false;
+	if (recordedEvents.length > 0) {
+		recordingDuration = recordedEvents[recordedEvents.length - 1].timestamp;
+		showSaveDialog = true;
+	}
+}
+
+function captureEvent(
+	device: BluetoothDevice,
+	scalarIndex: number,
+	value: number,
+) {
+	if (!recordingStartTime) return;
+
+	const timestamp = performance.now() - recordingStartTime;
+	const scalarCmd = device.info.messageAttributes.ScalarCmd[scalarIndex];
+
+	recordedEvents.push({
+		timestamp,
+		deviceIndex: device.info.index,
+		deviceName: device.name,
+		actuatorIndex: scalarIndex,
+		actuatorType: scalarCmd.ActuatorType,
+		value: (value / scalarCmd.StepCount) * 100, // Normalize to 0-100
+	});
 }
 
 async function handleStop(device: BluetoothDevice) {
@@ -123,6 +177,57 @@ function convertDevice(device: ButtplugClientDevice): BluetoothDevice {
 		actuatorValues: device.messageAttributes.ScalarCmd.map(() => 0),
 		info: device,
 	};
+}
+
+async function handleSaveRecording(data: {
+	title: string;
+	description: string;
+	tags: string[];
+}) {
+	const deviceInfo: DeviceInfo[] = devices.map((d) => ({
+		name: d.name,
+		index: d.info.index,
+		capabilities: d.info.messageAttributes.ScalarCmd.map((cmd) => cmd.ActuatorType),
+	}));
+
+	try {
+		const directus = getDirectusInstance();
+		await directus.request(
+			customEndpoint({
+				method: "POST",
+				path: "/sexy/recordings",
+				body: JSON.stringify({
+					title: data.title,
+					description: data.description,
+					duration: recordingDuration,
+					events: recordedEvents,
+					device_info: deviceInfo,
+					tags: data.tags,
+					status: "draft",
+				}),
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}),
+		);
+
+		toast.success("Recording saved successfully!");
+		showSaveDialog = false;
+		recordedEvents = [];
+		recordingDuration = 0;
+
+		// Optionally navigate to dashboard
+		// goto("/me?tab=recordings");
+	} catch (error) {
+		console.error("Failed to save recording:", error);
+		toast.error("Failed to save recording. Please try again.");
+	}
+}
+
+function handleCancelSave() {
+	showSaveDialog = false;
+	recordedEvents = [];
+	recordingDuration = 0;
 }
 
 const { data } = $props();
@@ -166,7 +271,7 @@ onMount(() => {
                 <p class="text-lg text-muted-foreground mb-10">
                     {$_("play.description")}
                 </p>
-                <div class="flex justify-center">
+                <div class="flex justify-center gap-4 items-center">
                     <Button
                         size="lg"
                         disabled={!connected || scanning}
@@ -182,6 +287,29 @@ onMount(() => {
                             {$_("play.scan")}
                         {/if}
                     </Button>
+
+                    {#if devices.length > 0}
+                        {#if !isRecording}
+                            <Button
+                                size="lg"
+                                variant="outline"
+                                onclick={startRecording}
+                                class="cursor-pointer border-primary/30 hover:bg-primary/10"
+                            >
+                                <span class="icon-[ri--record-circle-line] w-5 h-5 mr-2"></span>
+                                Start Recording
+                            </Button>
+                        {:else}
+                            <Button
+                                size="lg"
+                                onclick={stopRecording}
+                                class="cursor-pointer bg-red-500 hover:bg-red-600 text-white"
+                            >
+                                <span class="icon-[ri--stop-circle-fill] w-5 h-5 mr-2 animate-pulse"></span>
+                                Stop Recording ({recordedEvents.length} events)
+                            </Button>
+                        {/if}
+                    {/if}
                 </div>
             </div>
         </div>
@@ -207,4 +335,18 @@ onMount(() => {
             </div>
         {/if}
     </div>
+
+    <!-- Recording Save Dialog -->
+    <RecordingSaveDialog
+        open={showSaveDialog}
+        events={recordedEvents}
+        deviceInfo={devices.map((d) => ({
+            name: d.name,
+            index: d.info.index,
+            capabilities: d.info.messageAttributes.ScalarCmd.map((cmd) => cmd.ActuatorType),
+        }))}
+        duration={recordingDuration}
+        onSave={handleSaveRecording}
+        onCancel={handleCancelSave}
+    />
 </div>
