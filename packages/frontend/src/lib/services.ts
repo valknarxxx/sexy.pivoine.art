@@ -613,3 +613,20 @@ export async function deleteRecording(id: string) {
 		{ id },
 	);
 }
+
+export async function getRecording(id: string, fetch?: typeof globalThis.fetch) {
+	return loggedApiCall(
+		"getRecording",
+		async () => {
+			const directus = getDirectusInstance(fetch);
+			const response = await directus.request<Recording>(
+				customEndpoint({
+					method: "GET",
+					path: `/sexy/recordings/${id}`,
+				}),
+			);
+			return response;
+		},
+		{ id },
+	);
+}
