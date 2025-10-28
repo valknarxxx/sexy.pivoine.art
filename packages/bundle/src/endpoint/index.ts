@@ -1,3 +1,5 @@
+import { checkAchievements } from "./gamification";
+
 const createPolicyFilter = (policy) => ({
 	_or: [
 		{
@@ -726,6 +728,205 @@ export default {
 			} catch (error: any) {
 				console.error("Analytics error:", error);
 				res.status(500).json({ error: error.message || "Failed to get analytics" });
+			}
+		});
+
+		// =========================================
+		// GAMIFICATION ENDPOINTS
+		// =========================================
+
+		// GET /sexy/gamification/leaderboard - Get top users by weighted score
+		router.get("/gamification/leaderboard", async (req, res) => {
+			try {
+				const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+				const offset = parseInt(req.query.offset as string) || 0;
+
+				const leaderboard = await database("sexy_user_stats as s")
+					.leftJoin("directus_users as u", "s.user_id", "u.id")
+					.select(
+						"u.id as user_id",
+						"u.artist_name as display_name",
+						"u.avatar",
+						"s.total_weighted_points",
+						"s.total_raw_points",
+						"s.recordings_count",
+						"s.playbacks_count",
+						"s.achievements_count",
+					)
+					.orderBy("s.total_weighted_points", "desc")
+					.limit(limit)
+					.offset(offset);
+
+				// Add rank to each entry
+				const leaderboardWithRank = leaderboard.map((entry, index) => ({
+					...entry,
+					rank: offset + index + 1,
+				}));
+
+				res.json({ data: leaderboardWithRank });
+			} catch (error: any) {
+				console.error("Leaderboard error:", error);
+				res.status(500).json({ error: error.message || "Failed to get leaderboard" });
+			}
+		});
+
+		// GET /sexy/gamification/user/:id - Get gamification stats for a user
+		router.get("/gamification/user/:id", async (req, res) => {
+			try {
+				const { id } = req.params;
+
+				// Get user stats
+				const stats = await database("sexy_user_stats")
+					.where({ user_id: id })
+					.first();
+
+				// Calculate rank
+				let rank = 1;
+				if (stats) {
+					const rankResult = await database("sexy_user_stats")
+						.where("total_weighted_points", ">", stats.total_weighted_points)
+						.count("* as count");
+					rank = (rankResult[0]?.count || 0) + 1;
+				}
+
+				// Get unlocked achievements
+				const achievements = await database("sexy_user_achievements as ua")
+					.leftJoin("sexy_achievements as a", "ua.achievement_id", "a.id")
+					.where({ "ua.user_id": id })
+					.whereNotNull("ua.date_unlocked")
+					.select(
+						"a.id",
+						"a.code",
+						"a.name",
+						"a.description",
+						"a.icon",
+						"a.category",
+						"ua.date_unlocked",
+						"ua.progress",
+						"a.required_count",
+					)
+					.orderBy("ua.date_unlocked", "desc");
+
+				// Get recent points
+				const recentPoints = await database("sexy_user_points")
+					.where({ user_id: id })
+					.select("action", "points", "date_created", "recording_id")
+					.orderBy("date_created", "desc")
+					.limit(10);
+
+				res.json({
+					stats: stats ? { ...stats, rank } : null,
+					achievements,
+					recent_points: recentPoints,
+				});
+			} catch (error: any) {
+				console.error("User gamification error:", error);
+				res.status(500).json({ error: error.message || "Failed to get user gamification data" });
+			}
+		});
+
+		// GET /sexy/gamification/achievements - Get all achievements
+		router.get("/gamification/achievements", async (req, res) => {
+			try {
+				const achievements = await database("sexy_achievements")
+					.where({ status: "published" })
+					.select(
+						"id",
+						"code",
+						"name",
+						"description",
+						"icon",
+						"category",
+						"required_count",
+						"points_reward",
+					)
+					.orderBy("sort", "asc");
+
+				res.json({ data: achievements });
+			} catch (error: any) {
+				console.error("Achievements error:", error);
+				res.status(500).json({ error: error.message || "Failed to get achievements" });
+			}
+		});
+
+		// POST /sexy/recordings/:id/play - Record a recording play (with gamification)
+		router.post("/recordings/:id/play", async (req, res) => {
+			const accountability = req.accountability;
+			const recordingId = req.params.id;
+
+			try {
+				// Get recording to check ownership
+				const recording = await database("sexy_recordings")
+					.where({ id: recordingId })
+					.first();
+
+				if (!recording) {
+					return res.status(404).json({ error: "Recording not found" });
+				}
+
+				// Record play
+				const play = await database("sexy_recording_plays").insert({
+					user_id: accountability?.user || null,
+					recording_id: recordingId,
+					duration_played: 0,
+					completed: false,
+					date_created: new Date(),
+				}).returning("id");
+
+				const playId = play[0]?.id || play[0];
+
+				// Award points if user is authenticated and not playing own recording
+				if (accountability?.user && recording.user_created !== accountability.user) {
+					const { awardPoints, POINT_VALUES } = await import("./gamification");
+					await awardPoints(database, accountability.user, "RECORDING_PLAY", recordingId);
+					await checkAchievements(database, accountability.user, "playback");
+				}
+
+				res.json({ success: true, play_id: playId });
+			} catch (error: any) {
+				console.error("Recording play error:", error);
+				res.status(500).json({ error: error.message || "Failed to record play" });
+			}
+		});
+
+		// PATCH /sexy/recordings/:id/play/:playId - Update play progress (with gamification)
+		router.patch("/recordings/:id/play/:playId", async (req, res) => {
+			const { playId } = req.params;
+			const { duration_played, completed } = req.body;
+			const accountability = req.accountability;
+
+			try {
+				// Get existing play record
+				const existingPlay = await database("sexy_recording_plays")
+					.where({ id: playId })
+					.first();
+
+				if (!existingPlay) {
+					return res.status(404).json({ error: "Play record not found" });
+				}
+
+				const wasCompleted = existingPlay.completed;
+
+				// Update play record
+				await database("sexy_recording_plays")
+					.where({ id: playId })
+					.update({
+						duration_played,
+						completed,
+						date_updated: new Date(),
+					});
+
+				// Award completion points if newly completed
+				if (completed && !wasCompleted && accountability?.user) {
+					const { awardPoints } = await import("./gamification");
+					await awardPoints(database, accountability.user, "RECORDING_COMPLETE", existingPlay.recording_id);
+					await checkAchievements(database, accountability.user, "playback");
+				}
+
+				res.json({ success: true });
+			} catch (error: any) {
+				console.error("Update play error:", error);
+				res.status(500).json({ error: error.message || "Failed to update play" });
 			}
 		});
 	},
