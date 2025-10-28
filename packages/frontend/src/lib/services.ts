@@ -156,10 +156,9 @@ export async function getArticles(fetch?: typeof globalThis.fetch) {
 	return loggedApiCall("getArticles", async () => {
 		const directus = getDirectusInstance(fetch);
 		return directus.request<Article[]>(
-			readItems("sexy_articles", {
-				fields: ["*", "author.*"],
-				where: { publish_date: { _lte: new Date().toISOString() } },
-				sort: ["-publish_date"],
+			customEndpoint({
+				method: "GET",
+				path: "/sexy/articles",
 			}),
 		);
 	});
@@ -194,31 +193,12 @@ export async function getArticleBySlug(
 export async function getVideos(fetch?: typeof globalThis.fetch) {
 	return loggedApiCall("getVideos", async () => {
 		const directus = getDirectusInstance(fetch);
-		return directus
-			.request<Video[]>(
-				readItems("sexy_videos", {
-					fields: [
-						"*",
-						{
-							models: [
-								"*",
-								{
-									directus_users_id: ["*"],
-								},
-							],
-						},
-						"movie.*",
-					],
-					filter: { upload_date: { _lte: new Date().toISOString() } },
-					sort: ["-upload_date"],
-				}),
-			)
-			.then((videos) => {
-				videos.forEach((video) => {
-					video.models = video.models.map((u) => u.directus_users_id!);
-				});
-				return videos;
-			});
+		return directus.request<Video[]>(
+			customEndpoint({
+				method: "GET",
+				path: "/sexy/videos",
+			}),
+		);
 	});
 }
 
@@ -228,16 +208,9 @@ export async function getVideosForModel(id, fetch?: typeof globalThis.fetch) {
 		async () => {
 			const directus = getDirectusInstance(fetch);
 			return directus.request<Video[]>(
-				readItems("sexy_videos", {
-					fields: ["*", "movie.*"],
-					filter: {
-						models: {
-							directus_users_id: {
-								id,
-							},
-						},
-					},
-					sort: ["-upload_date"],
+				customEndpoint({
+					method: "GET",
+					path: `/sexy/videos?model_id=${id}`,
 				}),
 			);
 		},
@@ -253,35 +226,12 @@ export async function getFeaturedVideos(
 		"getFeaturedVideos",
 		async () => {
 			const directus = getDirectusInstance(fetch);
-			return directus
-				.request<Video[]>(
-					readItems("sexy_videos", {
-						fields: [
-							"*",
-							{
-								models: [
-									"*",
-									{
-										directus_users_id: ["*"],
-									},
-								],
-							},
-							"movie.*",
-						],
-						filter: {
-							upload_date: { _lte: new Date().toISOString() },
-							featured: true,
-						},
-						sort: ["-upload_date"],
-						limit,
-					}),
-				)
-				.then((videos) => {
-					videos.forEach((video) => {
-						video.models = video.models.map((u) => u.directus_users_id!);
-					});
-					return videos;
-				});
+			return directus.request<Video[]>(
+				customEndpoint({
+					method: "GET",
+					path: `/sexy/videos?featured=true&limit=${limit}`,
+				}),
+			);
 		},
 		{ limit },
 	);
@@ -326,27 +276,6 @@ export async function getVideoBySlug(
 	);
 }
 
-const modelFilter = {
-	_or: [
-		{
-			policies: {
-				policy: {
-					name: {
-						_eq: "Model",
-					},
-				},
-			},
-		},
-		{
-			role: {
-				name: {
-					_eq: "Model",
-				},
-			},
-		},
-	],
-};
-
 export async function getModels(fetch?: typeof globalThis.fetch) {
 	return loggedApiCall("getModels", async () => {
 		const directus = getDirectusInstance(fetch);
@@ -386,31 +315,12 @@ export async function getModelBySlug(
 		"getModelBySlug",
 		async () => {
 			const directus = getDirectusInstance(fetch);
-			return directus
-				.request<Model[]>(
-					readUsers({
-						fields: [
-							"*",
-							{
-								photos: [
-									"*",
-									{
-										directus_files_id: ["*"],
-									},
-								],
-							},
-							"banner.*",
-						],
-						filter: { _and: [modelFilter, { slug: { _eq: slug } }] },
-					}),
-				)
-				.then((models) => {
-					if (models.length === 0) {
-						throw new Error("Model not found");
-					}
-					models[0].photos = models[0].photos.map((p) => p.directus_files_id!);
-					return models[0];
-				});
+			return directus.request<Model>(
+				customEndpoint({
+					method: "GET",
+					path: `/sexy/models/${slug}`,
+				}),
+			);
 		},
 		{ slug },
 	);

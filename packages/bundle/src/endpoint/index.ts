@@ -110,6 +110,141 @@ export default {
 			}
 		});
 
+		// GET /sexy/models/:slug - Get single model by slug
+		router.get("/models/:slug", async (req, res) => {
+			try {
+				const { slug } = req.params;
+
+				const model = await database
+					.select("u.*")
+					.from("directus_users as u")
+					.leftJoin("directus_roles as r", "u.role", "r.id")
+					.where("r.name", "Model")
+					.where(database.raw("LOWER(u.first_name || ' ' || u.last_name)"), slug.toLowerCase().replace(/-/g, " "))
+					.first();
+
+				if (!model) {
+					return res.status(404).json({ error: "Model not found" });
+				}
+
+				// Fetch photos
+				const photos = await database
+					.select("df.*")
+					.from("sexy_model_photos as mp")
+					.leftJoin("directus_files as df", "mp.directus_files_id", "df.id")
+					.where("mp.directus_users_id", model.id);
+
+				model.photos = photos.map((p) => ({ directus_files_id: p }));
+
+				// Fetch banner
+				if (model.banner) {
+					const banner = await database
+						.select("*")
+						.from("directus_files")
+						.where("id", model.banner)
+						.first();
+					model.banner = banner;
+				}
+
+				res.json(model);
+			} catch (error: any) {
+				console.error("Model by slug error:", error);
+				res.status(500).json({ error: error.message || "Failed to fetch model" });
+			}
+		});
+
+		// GET /sexy/videos - List videos
+		router.get("/videos", async (req, res) => {
+			try {
+				const { model_id, limit } = req.query;
+
+				let query = database
+					.select("v.*")
+					.from("sexy_videos as v")
+					.where("v.upload_date", "<=", new Date().toISOString())
+					.orderBy("v.upload_date", "desc");
+
+				if (model_id) {
+					query = query
+						.leftJoin("sexy_videos_models as vm", "v.id", "vm.sexy_videos_id")
+						.where("vm.directus_users_id", model_id);
+				}
+
+				if (limit) {
+					query = query.limit(parseInt(limit as string));
+				}
+
+				const videos = await query;
+
+				// Fetch models and movie for each video
+				for (const video of videos) {
+					// Fetch models
+					const models = await database
+						.select("u.*")
+						.from("sexy_videos_models as vm")
+						.leftJoin("directus_users as u", "vm.directus_users_id", "u.id")
+						.where("vm.sexy_videos_id", video.id);
+
+					video.models = models;
+
+					// Fetch movie file
+					if (video.movie) {
+						const movie = await database
+							.select("*")
+							.from("directus_files")
+							.where("id", video.movie)
+							.first();
+						video.movie = movie;
+					}
+				}
+
+				res.json(videos);
+			} catch (error: any) {
+				console.error("Videos endpoint error:", error);
+				res.status(500).json({ error: error.message || "Failed to fetch videos" });
+			}
+		});
+
+		// GET /sexy/articles - List articles
+		router.get("/articles", async (req, res) => {
+			try {
+				const { featured, limit } = req.query;
+
+				let query = database
+					.select("a.*")
+					.from("sexy_articles as a")
+					.where("a.publish_date", "<=", new Date().toISOString())
+					.orderBy("a.publish_date", "desc");
+
+				if (featured === "true") {
+					query = query.where("a.featured", true);
+				}
+
+				if (limit) {
+					query = query.limit(parseInt(limit as string));
+				}
+
+				const articles = await query;
+
+				// Fetch author for each article
+				for (const article of articles) {
+					if (article.author) {
+						const author = await database
+							.select("*")
+							.from("directus_users")
+							.where("id", article.author)
+							.first();
+						article.author = author;
+					}
+				}
+
+				res.json(articles);
+			} catch (error: any) {
+				console.error("Articles endpoint error:", error);
+				res.status(500).json({ error: error.message || "Failed to fetch articles" });
+			}
+		});
+
 		// GET /sexy/recordings - List user's recordings
 		router.get("/recordings", async (req, res) => {
 			const accountability = req.accountability;
