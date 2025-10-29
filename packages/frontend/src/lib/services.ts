@@ -5,7 +5,6 @@ import {
 	updateMe,
 	readMe,
 	registerUserVerify,
-	readUsers,
 	passwordRequest,
 	passwordReset,
 	customEndpoint,
@@ -243,27 +242,28 @@ export async function getVideoBySlug(
 	return loggedApiCall(
 		"getVideoBySlug",
 		async () => {
-			const directus = getDirectusInstance(fetch);
-			return directus
-				.request<Video[]>(
-					readItems("sexy_videos", {
-						fields: [
-							"*",
-							{
-								models: [
-									"*",
-									{
-										directus_users_id: ["*"],
-									},
-								],
-							},
-							"movie.*",
-						],
-						filter: { slug },
-					}),
-				)
-				.then((videos) => {
-					if (videos.length === 0) {
+			const fetchFn = fetch || globalThis.fetch;
+			return fetchFn(
+				`${directusApiUrl}/items/sexy_videos?${new URLSearchParams({
+					filter: JSON.stringify({ slug: { _eq: slug } }),
+					fields: JSON.stringify([
+						"*",
+						{
+							models: [
+								"*",
+								{
+									directus_users_id: ["*"],
+								},
+							],
+						},
+						"movie.*",
+					]),
+				})}`,
+			)
+				.then((res) => res.json())
+				.then((response) => {
+					const videos = response.data;
+					if (!videos || videos.length === 0) {
 						throw new Error("Video not found");
 					}
 					// Handle models array - filter out null/undefined and map to user objects
