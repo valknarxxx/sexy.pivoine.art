@@ -119,7 +119,7 @@ export default {
 					.from("directus_users as u")
 					.leftJoin("directus_roles as r", "u.role", "r.id")
 					.where("r.name", "Model")
-					.where(database.raw("LOWER(u.first_name || ' ' || u.last_name)"), slug.toLowerCase().replace(/-/g, " "))
+					.where("u.slug", slug)
 					.first();
 
 				if (!model) {
