@@ -266,7 +266,14 @@ export async function getVideoBySlug(
 					if (videos.length === 0) {
 						throw new Error("Video not found");
 					}
-					videos[0].models = videos[0].models.map((u) => u.directus_users_id!);
+					// Handle models array - filter out null/undefined and map to user objects
+					if (Array.isArray(videos[0].models)) {
+						videos[0].models = videos[0].models
+							.filter((u) => u && u.directus_users_id)
+							.map((u) => u.directus_users_id!);
+					} else {
+						videos[0].models = [];
+					}
 
 					return videos[0];
 				});
