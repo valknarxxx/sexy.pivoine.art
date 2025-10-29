@@ -1,4 +1,4 @@
-import { getDirectusInstance } from "$lib/directus";
+import { getDirectusInstance, directusApiUrl } from "$lib/directus";
 import {
 	readItems,
 	registerUser,
